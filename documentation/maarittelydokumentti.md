@@ -22,19 +22,23 @@ Kun sijoittelu on valmis, lasken riittävän hyvät polutukset käyttäen A*-polunlöy
 tilaa palojen väliin sijoitteluvaiheessa, joten tämän jälkeen vielä tiivistän ylimääräisen tyhjän tilan.
 
 Tarvittavavia tietorakenteita ovat esimerkiksi geneettisen algoritmin kromosomeille tehokas struct-tyyppinen rakenne sekä ainakin valmiille sijoittelulle
-ruudukko, josta selviää että mikä pala on missä kohtaa. Muitakin tietorakenteita tulee luultavasti tarvitsemaan - niitä implementoin sitten niiden tullessa
+ruudukko, josta selviää että mitä on missäkin kohtaa ruututasolla. Muitakin tietorakenteita tulee luultavasti tarvitsemaan - niitä implementoin sitten niiden tullessa
 vastaan.
 
 ### Aika- ja tilavaativuudet
-Geneettisen algoritmin aikavaativuudeksi tavoitteena on luokka O(p*i*n^2), missä p on populaation koko, i on iteraatioiden määrä ja n huoneiden määrä.
+Geneettisen algoritmin aikavaativuudeksi tavoitteena on luokka O(p*i*n^2), missä p on populaation koko, i on iteraatioiden määrä ja n palojen määrä.
 Tilavaativuuden olettaisin pysyvän tässä vaiheessa luokassa O(p*n).
 
 Polkujen löytämisen aikavaativuus tulee olemaan - normaalin A*-toiminnalisuuden tapaan - O(e), missä e on polkuruutujen kokonaismäärä.
-Tilavaativuus tässä vaiheessa on luultavasti jo luokkaa O(w^2), missä w on kaikkien huoneiden suurempien ulottuvuuksien (leveys tai korkeus)
+Tilavaativuus tässä vaiheessa on luultavasti jo luokkaa O(w^2), missä w on kaikkien palojen suurempien ulottuvuuksien (leveys tai korkeus)
 summa.
 
 Käyttämättömän polkutilan tiivistäminen onnistuu ahneesti käymällä kaikki palat järjestyksessä lähimmästä kaukaisimpaan ajassa O(n). Tilavaativuus
 on tällöinkin O(w^2).
+
+##Syötteet
+Ohjelmalle syötetään palojen "pohjapiirrustuksia" sekä ohjeita siitä, kuinka monta ja mitä palaa tulisi ottaa mukaan, tekstitiedostoina.
+
 
 ## Lähteet
 [1]: Facility layout problem, Wikipedia, luettu 12.9.2016. https://en.wikipedia.org/wiki/Facility_location_problem
