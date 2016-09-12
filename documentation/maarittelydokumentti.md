@@ -16,8 +16,8 @@ Suurin osa toiminnallisuudesta (itse algoritmit ja tietorakenteet sekä niitä käy
 kurssin vaatimusten salliessa saatan lopussa tehdä ohjelmalle graafisen käyttöliittymän Pythonilla.
 
 ## Toteutetut algoritmit ja tietorakenteet
-]Ratkaisuna tähän [NP-täydelliseksi todettuun][1] sijoitteluongelmaan aion käyttää geneettistä algoritmia, joka luo ja yhdistelee mahdollisia ratkaisuja
-ja löytää näin riittävän hyvän ratkaisun tarpeeksi pienessä ajassa. Innoitusta ratkaisumalliin olen hakenut esimerkiksi artikkeleista [2][2] ja [3][3].
+Ratkaisuna tähän NP-täydelliseksi todettuun (1) sijoitteluongelmaan aion käyttää geneettistä algoritmia, joka luo ja yhdistelee mahdollisia ratkaisuja
+ja löytää näin riittävän hyvän ratkaisun tarpeeksi pienessä ajassa. Innoitusta ratkaisumalliin olen hakenut esimerkiksi artikkeleista (2) ja (3).
 Kun sijoittelu on valmis, lasken riittävän hyvät polutukset käyttäen A*-polunlöytämistä mukailevaa menetelmää. Mahdollistan tämän jättämällä tyhjää
 tilaa palojen väliin sijoitteluvaiheessa, joten tämän jälkeen vielä tiivistän ylimääräisen tyhjän tilan.
 
