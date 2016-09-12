@@ -16,8 +16,8 @@ Suurin osa toiminnallisuudesta (itse algoritmit ja tietorakenteet sekä niitä käy
 kurssin vaatimusten salliessa saatan lopussa tehdä ohjelmalle graafisen käyttöliittymän Pythonilla.
 
 ## Toteutetut algoritmit ja tietorakenteet
-Ratkaisuna tähän NP-täydelliseksi [1] todettuun sijoitteluongelmaan aion käyttää geneettistä algoritmia, joka luo ja yhdistelee mahdollisia ratkaisuja
-ja löytää näin riittävän hyvän ratkaisun tarpeeksi pienessä ajassa. Innoitusta ratkaisumalliin olen hakenut esimerkiksi artikkeleista [2] ja [3].
+]Ratkaisuna tähän [NP-täydelliseksi todettuun][1] sijoitteluongelmaan aion käyttää geneettistä algoritmia, joka luo ja yhdistelee mahdollisia ratkaisuja
+ja löytää näin riittävän hyvän ratkaisun tarpeeksi pienessä ajassa. Innoitusta ratkaisumalliin olen hakenut esimerkiksi artikkeleista [2][2] ja [3][3].
 Kun sijoittelu on valmis, lasken riittävän hyvät polutukset käyttäen A*-polunlöytämistä mukailevaa menetelmää. Mahdollistan tämän jättämällä tyhjää
 tilaa palojen väliin sijoitteluvaiheessa, joten tämän jälkeen vielä tiivistän ylimääräisen tyhjän tilan.
 
@@ -42,5 +42,7 @@ Ohjelmalle syötetään palojen "pohjapiirrustuksia" sekä ohjeita siitä, kuinka mon
 
 ## Lähteet
 [1]: Facility layout problem, Wikipedia, luettu 12.9.2016. https://en.wikipedia.org/wiki/Facility_location_problem
+
 [2]: Tasadduq I.A., Imam M.H., Ahmad A-R, "A novel metasearch algorithm for facility layout optimization", http://www.usc.edu/dept/ise/caie/Checked%20Papers%20[ruhi%2012th%20sept]/word%20format%20papers/REGISTRATION%20PAID%20PAPERS%20FOR%20PROCEEDINGS/pdf/282%2013%20A%20NOVEL%20METASEARCH%20ALGORITHM%20FOR%20FACILITY%20LAYOUT%20OPTIMIZATION.pdf
+
 [3]: Balakrishnan J., Cheng C-H, Wong K-F, "FACOPT: a user friendly FACility layout OPTimization system", Computers & Operations Research Volume 30, Issue 11, September 2003, Pages 1625–1641
