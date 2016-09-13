@@ -1,0 +1,6 @@
+[package]
+name = "dwarfitect"
+version = "0.1.0"
+authors = ["laitalaj <julius.laitala@helsinki.fi>"]
+
+[dependencies]
