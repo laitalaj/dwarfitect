@@ -1,2 +1,3 @@
+extern crate rand;
 mod genetics;
-mod mapping;
+pub mod mapping;

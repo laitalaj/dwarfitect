@@ -1,2 +1,2 @@
-mod rooms;
-mod shapes;
+pub mod rooms;
+pub mod shapes;

@@ -3,15 +3,15 @@
 /// A simple rectangle struct
 /// (x, y) is the top left corner, w is width, h is height
 pub struct Rect {
-	x: i16,
-	y: i16,
-	w: i16,
-	h: i16,
+	pub x: i16,
+	pub y: i16,
+	pub w: i16,
+	pub h: i16,
 }
 
 impl Rect {
 	///"Rotates" the rectangle: switches width with height
-	fn rotate(&self) -> Rect {
+	pub fn rotate(&self) -> Rect {
 		Rect { x: self.x, y: self.y, w: self.h, h: self.w }
 	}
 }
