@@ -1,13 +1,19 @@
 use std::vec::Vec;
-use std::ops::Range;
+use std::collections::HashMap;
 use rand::Rng;
+use rand::distributions::{IndependentSample, Range};
 use mapping::shapes::Rect;
+
+//TODO: Get rid of this hardcoding
+const CROSSOVER_CHANCE: f32 = 0.7;
+const MUTATION_CHANCE: f32 = 0.01;
 
 /// Genes are rooms represented only by their bounding rectangle. A chromosome
 /// is made of these.
+#[derive(Copy, Clone)]
 pub struct Gene {
   rect: Rect,
-  gene_id: i16 //Possibly pointer or something here?
+  gene_id: i16
 }
 
 /// Chromosomes are possible solutions. They handle the genetic operations.
@@ -60,32 +66,37 @@ impl Gene {
 }
 
 impl Chromosome {
+	
+	/// A constructor for the chromosome
+	pub fn new(genes: Vec<Gene>) -> Chromosome{
+		Chromosome{ genes: genes, fitness: 0.0 } //TODO: Fitness calculation, cleanliness
+	}
+	
 	/// The mating function: Two children are created by swapping half of this 
-	/// chromosomes genes with the partner chromosome's genes
+	/// chromosomes genes with the partner chromosome's genes (aka. crossover)
 	/// # Panics
 	/// Panics if trying to mate two genes of different lengths!
 	/// (Doing that is contrary to both natural evolution AND the word of God!)
 	fn mate<R: Rng>(&self, partner: &Chromosome, rng: &mut R) 
-	-> [Option<Chromosome>; 2] {
+	-> (Chromosome, Chromosome) {
 		if self.genes.len() != partner.genes.len() {
 			panic!("Tried to mate chromosomes with different lengths! 
 			Shame on you!");
 		}
-		let swap_len = self.genes.len() / 2;
-		let swap_pos = Range::new(0, self.genes.len() - swap_len - 1)
-		.ind_sample(rng);
-		// Fill some stacks that contain the gene order of chromosomes for
-		// efficient child creation
-		let my_stack = Vec::new();
-		let partners_stack = Vec::new();
-		for i in (1..self.genes.len()).rev() { //Goes from len-1 to 0
-			my_stack.push(self.genes.get(i));
-			partners_stack.push(partner.genes.get(i));
+		let mut my_childs_genes: Vec<Gene> = Vec::new();
+		let mut partners_childs_genes: Vec<Gene> = Vec::new();
+		for i in 0..self.genes.len()-1 {
+			if rng.next_f32() < CROSSOVER_CHANCE {
+				partners_childs_genes.push(self.genes[i]);
+				my_childs_genes.push(partner.genes[i]);
+			} else {
+				my_childs_genes.push(self.genes[i]);
+				partners_childs_genes.push(partner.genes[i]);
+			}
 		}
-		let output: [Option<Chromosome>; 2] = [None, None];
-		for _ in 0..1 {
-			//Tästä jatka (-:
-		}
+		let my_child = Chromosome::new(my_childs_genes);
+		let partners_child = Chromosome::new(partners_childs_genes);
+		(my_child, partners_child)
 	}
 }
 
@@ -96,6 +107,23 @@ mod tests {
 
   use super::*;
   use mapping::shapes::Rect;
+  use rand::Rng;
+  
+  struct TestRng {
+  	numbers: Vec<f32>
+  }
+  
+  impl Rng for TestRng {
+  	fn next_u32(&mut self) -> u32 {
+  		panic!("Not supported!");
+  	}
+  	fn next_f32(&mut self) -> f32 {
+  		match self.numbers.pop() {
+  			Some(n) => n,
+  			None => panic!("Ran out of numbers!")
+  		}
+  	}
+  }
 
   #[test]
   fn gene_rotates_correctly() {
@@ -120,4 +148,14 @@ mod tests {
     assert_eq!(9, gene1.get_x());
     assert_eq!(10, gene1.get_y());
   }
+  
+  #[test]
+  fn crossover_works_correctly() {
+  	let rect1 = Rect { x: 2, y: 3, w: 5, h: 7 };
+    let gene1 = Gene { rect: rect1, gene_id: 0 };
+    let rect2 = Rect { x: 1, y: 0, w: 3, h: 3 };
+    let gene2 = Gene { rect: rect2, gene_id: 1};
+    assert!(true); //TODO: Finish this test
+  }
+  
 }
