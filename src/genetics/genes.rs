@@ -5,19 +5,19 @@ use rand::distributions::{IndependentSample, Range};
 use mapping::shapes::Rect;
 
 //TODO: Get rid of this hardcoding
-const CROSSOVER_CHANCE: f32 = 0.7;
-const MUTATION_CHANCE: f32 = 0.01;
+pub const CROSSOVER_CHANCE: f32 = 0.7;
+pub const MUTATION_CHANCE: f32 = 0.01;
 
 /// Genes are rooms represented only by their bounding rectangle. A chromosome
 /// is made of these.
-#[derive(Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub struct Gene {
   rect: Rect,
   gene_id: i16
 }
 
 /// Chromosomes are possible solutions. They handle the genetic operations.
-struct Chromosome {
+pub struct Chromosome {
   genes: Vec<Gene>,
   fitness: f32
 }
@@ -77,7 +77,7 @@ impl Chromosome {
 	/// # Panics
 	/// Panics if trying to mate two genes of different lengths!
 	/// (Doing that is contrary to both natural evolution AND the word of God!)
-	fn mate<R: Rng>(&self, partner: &Chromosome, rng: &mut R) 
+	pub fn mate<R: Rng>(&self, partner: &Chromosome, rng: &mut R) 
 	-> (Chromosome, Chromosome) {
 		if self.genes.len() != partner.genes.len() {
 			panic!("Tried to mate chromosomes with different lengths! 
@@ -85,7 +85,7 @@ impl Chromosome {
 		}
 		let mut my_childs_genes: Vec<Gene> = Vec::new();
 		let mut partners_childs_genes: Vec<Gene> = Vec::new();
-		for i in 0..self.genes.len()-1 {
+		for i in 0..self.genes.len() {
 			if rng.next_f32() < CROSSOVER_CHANCE {
 				partners_childs_genes.push(self.genes[i]);
 				my_childs_genes.push(partner.genes[i]);
@@ -150,12 +150,28 @@ mod tests {
   }
   
   #[test]
-  fn crossover_works_correctly() {
+  fn mating_works_correctly() {
   	let rect1 = Rect { x: 2, y: 3, w: 5, h: 7 };
     let gene1 = Gene { rect: rect1, gene_id: 0 };
     let rect2 = Rect { x: 1, y: 0, w: 3, h: 3 };
     let gene2 = Gene { rect: rect2, gene_id: 1};
-    assert!(true); //TODO: Finish this test
+    let mut gene3 = gene1;
+    gene3.set_x(4);
+    let mut gene4 = gene2;
+    gene4.set_y(5);
+    let genes1 = vec![gene1, gene2];
+    let genes2 = vec![gene3, gene4];
+    let chrom1 = Chromosome::new(genes1);
+    let chrom2 = Chromosome::new(genes2);
+    let crossover_delta = CROSSOVER_CHANCE * 0.1;
+    let random_numbers = vec![CROSSOVER_CHANCE - crossover_delta,
+    CROSSOVER_CHANCE + crossover_delta];
+    let mut rng = TestRng{ numbers: random_numbers };
+    let (child1, child2) = chrom1.mate(&chrom2, &mut rng);
+    assert_eq!(gene1, child1.genes[0]);
+    assert_eq!(gene4, child1.genes[1]);
+    assert_eq!(gene3, child2.genes[0]);
+    assert_eq!(gene2, child2.genes[1]);
   }
   
 }

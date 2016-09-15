@@ -2,7 +2,7 @@
 
 /// A simple rectangle struct
 /// (x, y) is the top left corner, w is width, h is height
-#[derive(Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub struct Rect {
 	pub x: i16,
 	pub y: i16,
