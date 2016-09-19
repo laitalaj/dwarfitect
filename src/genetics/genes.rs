@@ -2,7 +2,8 @@
 
 use std::vec::Vec;
 use rand::Rng;
-use mapping::shapes::Rect;
+use mapping::shapes::{Point, Rect, Direction};
+use mapping::shapes::Direction::{Left, Right, Up, Down};
 
 //TODO: Get rid of this hardcoding
 pub const CROSSOVER_CHANCE: f32 = 0.7;
@@ -35,7 +36,12 @@ impl Gene {
   fn rot_in_place(&mut self) {
     self.rect = self.rect.rotate();
   }
-  
+  fn collides_with(&self, gene: Gene) -> bool{
+  	self.rect.collides_with(gene.rect)
+  }
+  fn center(&self) -> Point {
+  	self.rect.center()
+  }
   fn get_x(&self) -> i16 {
     self.rect.x
   }
@@ -72,7 +78,52 @@ impl Chromosome {
 	pub fn new(genes: Vec<Gene>) -> Chromosome{
 		Chromosome{ genes: genes, fitness: 0.0 } //TODO: Fitness calculation, cleanliness
 	}
-	
+	pub fn generate_initial<R: Rng>(genes: Vec<Gene>, rng: &mut R) 
+	-> Chromosome {
+		let mut shuffled_genes = genes.to_vec();
+		rng.shuffle(&mut shuffled_genes);
+		shuffled_genes[0].set_x(0);
+		shuffled_genes[0].set_y(0);
+		let mut places_to_go: Vec<(i16, i16, Direction)> = Vec::new();
+		places_to_go.push((0, 0, Left));
+		places_to_go.push((0, 0, Up));
+		places_to_go.push((shuffled_genes[0].get_x(), 0, Right));
+		places_to_go.push((0, shuffled_genes[0].get_y(), Down));
+		for i in 1..shuffled_genes.len() {
+			let place = places_to_go.remove(0); //TODO: Create an efficient queue
+			let mut x = place.0;
+			let mut y = place.1;
+			match place.2{ //TODO: Split this to different functions
+				Left => { 
+					x -= shuffled_genes[i].get_x();
+					places_to_go.push((x, y, Left));
+				},
+				Up => {
+					y -= shuffled_genes[i].get_y();
+					places_to_go.push((x, y, Up));
+				},
+				Right => places_to_go
+				.push((x + shuffled_genes[i].get_x(), y, Right)),
+				Down => places_to_go
+				.push((x, y + shuffled_genes[i].get_y(), Down))
+			}
+			shuffled_genes[i].set_x(x);
+			shuffled_genes[i].set_y(y);
+		}
+		Chromosome::new(shuffled_genes) //placeholder
+	}
+	fn relax(&mut self){
+		for i in 0..self.genes.len() {
+			for j in i..self.genes.len() {
+				if self.genes[i].collides_with(self.genes[j]){
+					let center1 = self.genes[i].center();
+					let center2 = self.genes[j].center();
+					let diff = center1.diff(center2);
+					//Continue here
+				}
+			}
+		}
+	}
 	/// The mating function: Two children are created by swapping this 
 	/// chromosomes genes with the partner chromosome's genes (aka. crossover).
 	/// The probability of a swap happening per gene is equal to 
