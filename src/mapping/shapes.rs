@@ -11,7 +11,8 @@ pub struct Rect {
 }
 
 impl Rect {
-	///"Rotates" the rectangle: switches width with height
+	///"Rotates" the rectangle: returns a new rectangle with switched width and
+	/// height.
 	pub fn rotate(&self) -> Rect {
 		Rect { x: self.x, y: self.y, w: self.h, h: self.w }
 	}

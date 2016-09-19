@@ -1,7 +1,7 @@
+//! Module for genetic structs
+
 use std::vec::Vec;
-use std::collections::HashMap;
 use rand::Rng;
-use rand::distributions::{IndependentSample, Range};
 use mapping::shapes::Rect;
 
 //TODO: Get rid of this hardcoding
@@ -35,6 +35,7 @@ impl Gene {
   fn rot_in_place(&mut self) {
     self.rect = self.rect.rotate();
   }
+  
   fn get_x(&self) -> i16 {
     self.rect.x
   }
@@ -72,8 +73,10 @@ impl Chromosome {
 		Chromosome{ genes: genes, fitness: 0.0 } //TODO: Fitness calculation, cleanliness
 	}
 	
-	/// The mating function: Two children are created by swapping half of this 
-	/// chromosomes genes with the partner chromosome's genes (aka. crossover)
+	/// The mating function: Two children are created by swapping this 
+	/// chromosomes genes with the partner chromosome's genes (aka. crossover).
+	/// The probability of a swap happening per gene is equal to 
+	/// CROSSOVER_CHANCE
 	/// # Panics
 	/// Panics if trying to mate two genes of different lengths!
 	/// (Doing that is contrary to both natural evolution AND the word of God!)
@@ -109,14 +112,27 @@ mod tests {
   use mapping::shapes::Rect;
   use rand::Rng;
   
+  /// Test random number generatror - gives back floats that were given to it in
+  /// the numbers-vector one by one.
   struct TestRng {
   	numbers: Vec<f32>
   }
   
   impl Rng for TestRng {
+  	/// Should return an unsigned 32 bit integer. However, this RNG returns only
+  	/// floats, so this is not implemented.
+  	/// If I understood correctly, this function is, by default, used by other
+  	/// random functions that have not been overwritten - that means they will
+  	/// panic too.
+  	/// # Panics
+  	/// Always
   	fn next_u32(&mut self) -> u32 {
   		panic!("Not supported!");
   	}
+  	/// Returns the next f32 in the numbers-vector. Uses the numbers-vector as
+  	/// a stack, so always retuns and removes from the vector the last number.
+  	/// # Panics
+  	/// Panics when runs out of numbers
   	fn next_f32(&mut self) -> f32 {
   		match self.numbers.pop() {
   			Some(n) => n,
