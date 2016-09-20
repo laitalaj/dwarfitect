@@ -1,6 +1,7 @@
 //! Module for genetic structs
 
 use std::vec::Vec;
+use std::cmp::Ordering;
 use rand::Rng;
 use mapping::shapes::{Point, Rect, Direction};
 use mapping::shapes::Direction::{Left, Right, Up, Down};
@@ -20,7 +21,20 @@ pub struct Gene {
 /// Chromosomes are possible solutions. They handle the genetic operations.
 pub struct Chromosome {
   genes: Vec<Gene>,
+  total_area: i16,
   fitness: f32
+}
+
+impl PartialOrd for Gene {
+	fn partial_cmp(&self, other: &Gene) -> Option<Ordering> {
+		Some(self.cmp(other))
+	}
+}
+
+impl Ord for Gene {
+	fn cmp(&self, other: &Gene) -> Ordering {
+		self.gene_id.cmp(&other.gene_id)
+	}
 }
 
 impl Gene {
@@ -39,8 +53,17 @@ impl Gene {
   fn collides_with(&self, gene: Gene) -> bool{
   	self.rect.collides_with(gene.rect)
   }
+  fn area(&self) -> i16 {
+  	self.rect.area()
+  }
   fn center(&self) -> Point {
   	self.rect.center()
+  }
+  fn top_left(&self) -> Point {
+  	self.rect.top_left()
+  }
+  fn bottom_right(&self) -> Point {
+  	self.rect.bottom_right()
   }
   fn get_x(&self) -> i16 {
     self.rect.x
@@ -76,7 +99,11 @@ impl Chromosome {
 	
 	/// A constructor for the chromosome
 	pub fn new(genes: Vec<Gene>) -> Chromosome{
-		Chromosome{ genes: genes, fitness: 0.0 } //TODO: Fitness calculation, cleanliness
+		let mut total_area = 0;
+		for i in 0..genes.len() {
+			total_area += genes[i].area();
+		}
+		Chromosome{ genes: genes, total_area: total_area, fitness: 0.0 }
 	}
 	pub fn generate_initial<R: Rng>(genes: Vec<Gene>, rng: &mut R) 
 	-> Chromosome {
@@ -110,19 +137,64 @@ impl Chromosome {
 			shuffled_genes[i].set_x(x);
 			shuffled_genes[i].set_y(y);
 		}
+		shuffled_genes.sort();
 		Chromosome::new(shuffled_genes) //placeholder
 	}
-	fn relax(&mut self){
+	fn relax(&mut self){ //TODO: This might not work as intended...
+		let absolute_center = self.genes[0].center();
 		for i in 0..self.genes.len() {
 			for j in i..self.genes.len() {
 				if self.genes[i].collides_with(self.genes[j]){
-					let center1 = self.genes[i].center();
+//					let center1 = self.genes[i].center();
 					let center2 = self.genes[j].center();
-					let diff = center1.diff(center2);
-					//Continue here
+					let diff = absolute_center.diff(center2);
+					if diff.x.abs() < diff.y.abs() {
+						let mut new_y: i16;
+						if diff.y < 0 {
+							new_y = self.genes[i].get_y() 
+							- self.genes[j].get_h();
+						} else {
+							new_y = self.genes[i].get_y() 
+							+ self.genes[i].get_h();
+						}
+						self.genes[j].set_y(new_y);
+					} else {
+						let mut new_x: i16;
+						if diff.x < 0 {
+							new_x = self.genes[i].get_x() 
+							- self.genes[j].get_w();
+						} else {
+							new_x = self.genes[i].get_x() 
+							+ self.genes[i].get_w();
+						}
+						self.genes[j].set_x(new_x);
+					}
 				}
 			}
 		}
+	}
+	fn minimum_bounding_box(&self) -> Rect { //TODO: Store this in struct, make
+		let mut min_x = i16::max_value();	 //this update as part of other fns
+		let mut min_y = i16::max_value();
+		let mut max_x = i16::min_value();
+		let mut max_y = i16::min_value();
+		for i in 0..self.genes.len() {
+			let top_left = self.genes[i].top_left();
+			let bottom_right = self.genes[i].bottom_right();
+			if top_left.x < min_x {
+				min_x = top_left.x;
+			}
+			if top_left.y < min_y {
+				min_y = top_left.y;
+			}
+			if bottom_right.x > max_x {
+				max_x = bottom_right.x;
+			}
+			if bottom_right.y > max_y {
+				max_y = bottom_right.y;
+			}
+		}
+		Rect { x: min_x, y: min_y, w: max_x - min_x, h: max_y - min_y }
 	}
 	/// The mating function: Two children are created by swapping this 
 	/// chromosomes genes with the partner chromosome's genes (aka. crossover).
@@ -148,8 +220,10 @@ impl Chromosome {
 				partners_childs_genes.push(partner.genes[i]);
 			}
 		}
-		let my_child = Chromosome::new(my_childs_genes);
-		let partners_child = Chromosome::new(partners_childs_genes);
+		let mut my_child = Chromosome::new(my_childs_genes);
+		let mut partners_child = Chromosome::new(partners_childs_genes);
+//		my_child.relax();
+//		partners_child.relax();
 		(my_child, partners_child)
 	}
 }

@@ -40,8 +40,17 @@ impl Rect {
     self.x <= rect.x + rect.w && rect.x <= self.x + self.w &&
     self.y <= rect.y + rect.h && rect.y <= self.y + self.h
   }
+  pub fn area(&self) -> i16 {
+  	self.w * self.h
+  }
   pub fn center(&self) -> Point {
-    Point{ x: (self.x + self.w) / 2, y: (self.y + self.h) / 2 } 
+    Point { x: self.x + self.w / 2, y: self.y + self.h / 2 } 
+  }
+  pub fn top_left(&self) -> Point {
+  	Point { x: self.x, y: self.y }
+  }
+  pub fn bottom_right(&self) -> Point {
+  	Point { x: self.x + self.w, y: self.y + self.h }
   }
 }
 
