@@ -23,7 +23,9 @@ pub struct Gene {
 pub struct Chromosome {
   genes: Vec<Gene>,
   total_area: i16,
-  fitness: f32
+  fitness: f32,
+  bounding_box: Rect,
+  bounding_box_fresh: bool
 }
 
 impl PartialOrd for Gene {
@@ -106,7 +108,13 @@ impl Chromosome {
 		for i in 0..genes.len() {
 			total_area += genes[i].area();
 		}
-		Chromosome{ genes: genes, total_area: total_area, fitness: 0.0 }
+		let mut new_chromosome = Chromosome{ genes: genes, 
+			total_area: total_area, fitness: 0.0, 
+			bounding_box: Rect{ x: 0, y: 0, w: 0, h: 0 },
+			bounding_box_fresh: false
+		};
+		new_chromosome.calculate_fitness();
+		new_chromosome
 	}
 	pub fn generate_initial<R: Rng>(genes: Vec<Gene>, rng: &mut R) 
 	-> Chromosome {
@@ -144,7 +152,7 @@ impl Chromosome {
 			}
 		}
 		shuffled_genes.sort();
-		Chromosome::new(shuffled_genes) //placeholder
+		Chromosome::new(shuffled_genes)
 	}
 	fn relax(&mut self){ //TODO: This might not work as intended...
 		self.genes.sort_by(|a, b| a.rect_cmp(b));
@@ -166,8 +174,8 @@ impl Chromosome {
 		}
 		self.genes.sort();
 	}
-	fn minimum_bounding_box(&self) -> Rect { //TODO: Store this in struct, make
-		let mut min_x = i16::max_value();	 //this update as part of other fns
+	fn calculate_bounding_box(&mut self) {//TODO:Store this in struct, make
+		let mut min_x = i16::max_value(); //this update as part of other fns
 		let mut min_y = i16::max_value();
 		let mut max_x = i16::min_value();
 		let mut max_y = i16::min_value();
@@ -187,7 +195,15 @@ impl Chromosome {
 				max_y = bottom_right.y;
 			}
 		}
-		Rect { x: min_x, y: min_y, w: max_x - min_x, h: max_y - min_y }
+		self.bounding_box = 
+		Rect { x: min_x, y: min_y, w: max_x - min_x, h: max_y - min_y };
+		self.bounding_box_fresh = true;
+	}
+	pub fn calculate_fitness(&mut self) { //TODO: Actual fitness calculation
+		if !self.bounding_box_fresh {
+			self.calculate_bounding_box();
+		}
+		self.fitness = self.total_area as f32 / self.bounding_box.area() as f32;
 	}
 	/// The mating function: Two children are created by swapping this 
 	/// chromosomes genes with the partner chromosome's genes (aka. crossover).
@@ -218,6 +234,13 @@ impl Chromosome {
 //		my_child.relax();
 //		partners_child.relax();
 		(my_child, partners_child)
+	}
+	pub fn mutate<R: Rng>(&mut self, rng: &mut R){
+		for i in 0..self.genes.len() {
+			if rng.next_f32() < MUTATION_CHANCE {
+				
+			}
+		}
 	}
 }
 
