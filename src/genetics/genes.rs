@@ -139,13 +139,15 @@ impl Chromosome {
 			}
 			shuffled_genes[i].set_x(x);
 			shuffled_genes[i].set_y(y);
+			if rng.next_f32() > 0.5 { //50% chance to rotate
+				shuffled_genes[i].rotate();
+			}
 		}
 		shuffled_genes.sort();
 		Chromosome::new(shuffled_genes) //placeholder
 	}
 	fn relax(&mut self){ //TODO: This might not work as intended...
 		self.genes.sort_by(|a, b| a.rect_cmp(b));
-		let absolute_center = self.genes[0].center();
 		for i in 0..self.genes.len() {
 			for j in i+1..self.genes.len() {
 				if self.genes[i].collides_with(self.genes[j]){
@@ -211,8 +213,8 @@ impl Chromosome {
 				partners_childs_genes.push(partner.genes[i]);
 			}
 		}
-		let mut my_child = Chromosome::new(my_childs_genes);
-		let mut partners_child = Chromosome::new(partners_childs_genes);
+		let my_child = Chromosome::new(my_childs_genes);
+		let partners_child = Chromosome::new(partners_childs_genes);
 //		my_child.relax();
 //		partners_child.relax();
 		(my_child, partners_child)
@@ -323,6 +325,23 @@ mod tests {
     		assert!(!genes.genes[i].collides_with(genes.genes[j]), 
     			"{:?} collides with {:?}!", genes.genes[i], genes.genes[j]);
     	}
+    }
+  }
+  
+  #[test]
+  fn relax_keeps_gene_order() {
+  	let rect1 = Rect { x: 2, y: 3, w: 5, h: 7 };
+    let gene1 = Gene { rect: rect1, gene_id: 0 };
+    let rect2 = Rect { x: 1, y: 0, w: 3, h: 3 };
+    let gene2 = Gene { rect: rect2, gene_id: 1};
+    let rect3 = Rect { x: -2, y: 5, w: 5, h: 10 };
+    let gene3 = Gene { rect: rect3, gene_id: 2};
+    let rect4 = Rect { x: 0, y: -7, w: 12, h: 8 };
+    let gene4 = Gene { rect: rect4, gene_id: 3};
+    let mut genes = Chromosome::new(vec![gene1, gene2, gene3, gene4]);
+    genes.relax();
+    for i in 0..genes.genes.len() {
+    	assert_eq!(i as i16, genes.genes[i].gene_id);
     }
   }
   
