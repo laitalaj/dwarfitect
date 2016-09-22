@@ -12,4 +12,10 @@ Aikaa käytin 3h.
 **20.9.**
 Viimeistelin joitain relaksaatioon sekä alkupopulaatioon liittyviä asioita ja aloin hieman miettimään yksinkertaista tapaa laskea yksilön sopivuus.
 
-Aikaa käytetty näin aamulla 1h.
+Aikaa käytetty 1h.
+
+**22.9.**
+Vaihdoin relaksaatio-funktion hieman hitaampaan mutta sellaiseen joka oikeasti toimii, jatkoin sopivuuden laskemiseen liittyvän toiminnallisuuden 
+tekemistä.
+
+Aikaa käytetty 2h.
