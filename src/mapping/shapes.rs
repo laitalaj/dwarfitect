@@ -15,7 +15,7 @@ pub struct Point {
 
 /// A simple rectangle struct
 /// (x, y) is the top left corner, w is width, h is height
-#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug)]
 pub struct Rect {
   pub x: i16,
   pub y: i16,
@@ -37,8 +37,8 @@ impl Rect {
     Rect { x: self.x, y: self.y, w: self.h, h: self.w }
   }
   pub fn collides_with(&self, rect: Rect) -> bool {
-    self.x <= rect.x + rect.w && rect.x <= self.x + self.w &&
-    self.y <= rect.y + rect.h && rect.y <= self.y + self.h
+    self.x < rect.x + rect.w && rect.x < self.x + self.w &&
+    self.y < rect.y + rect.h && rect.y < self.y + self.h
   }
   pub fn area(&self) -> i16 {
   	self.w * self.h

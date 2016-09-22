@@ -19,6 +19,7 @@ pub struct Gene {
 }
 
 /// Chromosomes are possible solutions. They handle the genetic operations.
+#[derive(Debug)]
 pub struct Chromosome {
   genes: Vec<Gene>,
   total_area: i16,
@@ -38,7 +39,9 @@ impl Ord for Gene {
 }
 
 impl Gene {
-
+  fn rect_cmp(&self, other: &Gene) -> Ordering {
+  	self.rect.cmp(&other.rect)
+  }
   /// Rotates the gene (switches it's rectangles width with its height)
   /// Returns a new, rotated gene
   fn rotate(&self) -> Gene {
@@ -141,37 +144,25 @@ impl Chromosome {
 		Chromosome::new(shuffled_genes) //placeholder
 	}
 	fn relax(&mut self){ //TODO: This might not work as intended...
+		self.genes.sort_by(|a, b| a.rect_cmp(b));
 		let absolute_center = self.genes[0].center();
 		for i in 0..self.genes.len() {
-			for j in i..self.genes.len() {
+			for j in i+1..self.genes.len() {
 				if self.genes[i].collides_with(self.genes[j]){
-//					let center1 = self.genes[i].center();
-					let center2 = self.genes[j].center();
-					let diff = absolute_center.diff(center2);
+					let bottom_right1 = self.genes[i].bottom_right();
+					let top_left2 = self.genes[j].top_left();
+					let diff = top_left2.diff(bottom_right1);
 					if diff.x.abs() < diff.y.abs() {
-						let mut new_y: i16;
-						if diff.y < 0 {
-							new_y = self.genes[i].get_y() 
-							- self.genes[j].get_h();
-						} else {
-							new_y = self.genes[i].get_y() 
-							+ self.genes[i].get_h();
-						}
-						self.genes[j].set_y(new_y);
-					} else {
-						let mut new_x: i16;
-						if diff.x < 0 {
-							new_x = self.genes[i].get_x() 
-							- self.genes[j].get_w();
-						} else {
-							new_x = self.genes[i].get_x() 
-							+ self.genes[i].get_w();
-						}
+						let new_x = self.genes[j].get_x() + diff.x.abs();
 						self.genes[j].set_x(new_x);
+					} else {
+						let new_y = self.genes[j].get_y() + diff.y.abs();
+						self.genes[j].set_y(new_y);
 					}
 				}
 			}
 		}
+		self.genes.sort();
 	}
 	fn minimum_bounding_box(&self) -> Rect { //TODO: Store this in struct, make
 		let mut min_x = i16::max_value();	 //this update as part of other fns
@@ -313,6 +304,26 @@ mod tests {
     assert_eq!(gene4, child1.genes[1]);
     assert_eq!(gene3, child2.genes[0]);
     assert_eq!(gene2, child2.genes[1]);
+  }
+  
+  #[test]
+  fn no_intersections_after_relaxing() {
+  	let rect1 = Rect { x: 2, y: 3, w: 5, h: 7 };
+    let gene1 = Gene { rect: rect1, gene_id: 0 };
+    let rect2 = Rect { x: 1, y: 0, w: 3, h: 3 };
+    let gene2 = Gene { rect: rect2, gene_id: 1};
+    let rect3 = Rect { x: -2, y: 5, w: 5, h: 10 };
+    let gene3 = Gene { rect: rect3, gene_id: 2};
+    let rect4 = Rect { x: 0, y: -7, w: 12, h: 8 };
+    let gene4 = Gene { rect: rect4, gene_id: 3};
+    let mut genes = Chromosome::new(vec![gene1, gene2, gene3, gene4]);
+    genes.relax();
+    for i in 0..genes.genes.len() {
+    	for j in i + 1..genes.genes.len() {
+    		assert!(!genes.genes[i].collides_with(genes.genes[j]), 
+    			"{:?} collides with {:?}!", genes.genes[i], genes.genes[j]);
+    	}
+    }
   }
   
 }
