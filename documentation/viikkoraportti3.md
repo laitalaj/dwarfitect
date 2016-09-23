@@ -19,3 +19,11 @@ Vaihdoin relaksaatio-funktion hieman hitaampaan mutta sellaiseen joka oikeasti t
 tekemistä.
 
 Aikaa käytetty 2h.
+
+**23.9.**
+Tein alustavan mutaatiotoiminnallisuuden testejä vaille valmiiksi. Tämän lisäksi siistin koodia kirjoittelemalla dokumentaatiokommentteja
+ja korjailemalla rikkinäisiä indenttejä. Jälkimmäisen olisi pitänyt kaiken järjen mukaan sujua Ctrl-Shift-F:llä, mutta näköjään Rustin
+uutuus paistaa läpi tässä kohtaa; rustfmt, työkalu jolla tämä tapahtuisi, bugittaa tuntemattomasta syystä X (joka saattaa liittyä tai saattaa 
+olla liittymättä Eclipseen). Bugifiksiä odotellessa toimiihan se käsipelilläkin.
+
+Aikaa käytetty 2h.
