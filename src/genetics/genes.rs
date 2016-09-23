@@ -49,80 +49,81 @@ impl Ord for Gene {
 }
 
 impl Gene {
-  fn mutate<R: Rng>(&mut self, allowed_area: Rect, rng: &mut R) {
-  	let allowed_end = allowed_area.bottom_right();
-  	let allowed_x = Range::new(allowed_area.x, allowed_end.x); //TODO: make sure the whole gene stays in the area (not just the topleft corner)
-  	let allowed_y = Range::new(allowed_area.y, allowed_end.y);
-  	match rng.choose(&MUTATIONS) {
-  		Some(m) => match *m {
-  			RotationMutation => self.rot_in_place(),
-  			PositionMutation => { //TODO: Transition amount by chromosome fitness?
-  				self.set_x(allowed_x.ind_sample(rng));
-  				self.set_y(allowed_y.ind_sample(rng));
-  			}
+	fn mutate<R: Rng>(&mut self, allowed_area: Rect, rng: &mut R) {
+	  	let allowed_end = allowed_area.bottom_right();
+	  	let allowed_x = Range::new(allowed_area.x, allowed_end.x); 
+	  	//TODO: make sure the whole gene stays in the area (not just the topleft corner)
+	  	let allowed_y = Range::new(allowed_area.y, allowed_end.y);
+	  	match rng.choose(&MUTATIONS) {
+	  		Some(m) => match *m {
+	  			RotationMutation => self.rot_in_place(),
+	  			PositionMutation => { //TODO: Transition amount by chromosome fitness?
+	  				self.set_x(allowed_x.ind_sample(rng));
+	  				self.set_y(allowed_y.ind_sample(rng));
+	  			}
 //  			_ => panic!("Got a mutation type that's not yet implemented!")
 // Having a mutation type that's not implemented and still being able to compile
 // seems to be impossible. Rust <3
-  		},
-  		None => panic!("For some reason the mutation list was empty!")
-  	};
-  }
-  fn rect_cmp(&self, other: &Gene) -> Ordering {
-  	self.rect.cmp(&other.rect)
-  }
-  /// Rotates the gene (switches it's rectangles width with its height)
-  /// Returns a new, rotated gene
-  fn rotate(&self) -> Gene {
-    let new_rect = self.rect.rotate();
-    Gene{ rect: new_rect, gene_id: self.gene_id }
-  }
-  /// Rotates the gene in place (switches it's rectangles width with its
-  /// height). Only works for mutable genes.
-  fn rot_in_place(&mut self) {
-    self.rect = self.rect.rotate();
-  }
-  fn collides_with(&self, gene: Gene) -> bool{
-  	self.rect.collides_with(gene.rect)
-  }
-  fn area(&self) -> i16 {
-  	self.rect.area()
-  }
-  fn center(&self) -> Point {
-  	self.rect.center()
-  }
-  fn top_left(&self) -> Point {
-  	self.rect.top_left()
-  }
-  fn bottom_right(&self) -> Point {
-  	self.rect.bottom_right()
-  }
-  fn get_x(&self) -> i16 {
-    self.rect.x
-  }
-  fn get_y(&self) -> i16 {
-    self.rect.y
-  }
-  fn get_w(&self) -> i16 {
-    self.rect.w
-  }
-  fn get_h(&self) -> i16 {
-    self.rect.h
-  }
-  /// Creates a new gene that's a copy of this one but with a differing
-  /// position.
-  fn set_pos(&self, new_x: i16, new_y: i16) -> Gene {
-    let new_rect = Rect { x: new_x, y: new_y,
-      w: self.rect.w, h: self.rect.h };
-    Gene { rect: new_rect, gene_id: self.gene_id }
-  }
-  /// Sets the X position of the gene. Only works if the gene is mutable
-  fn set_x(&mut self, x: i16) {
-    self.rect.x = x;
-  }
-  /// Sets the Y position of the gene. Only works if the gene is mutable
-  fn set_y(&mut self, y: i16) {
-    self.rect.y = y;
-  }
+	  		},
+	  		None => panic!("For some reason the mutation list was empty!")
+	  	};
+	}
+	fn rect_cmp(&self, other: &Gene) -> Ordering {
+	  	self.rect.cmp(&other.rect)
+	}
+	/// Rotates the gene (switches it's rectangles width with its height)
+	/// Returns a new, rotated gene
+	fn rotate(&self) -> Gene {
+	    let new_rect = self.rect.rotate();
+	    Gene{ rect: new_rect, gene_id: self.gene_id }
+	}
+	/// Rotates the gene in place (switches it's rectangles width with its
+	/// height). Only works for mutable genes.
+	fn rot_in_place(&mut self) {
+	    self.rect = self.rect.rotate();
+	}
+	fn collides_with(&self, gene: Gene) -> bool{
+	  	self.rect.collides_with(gene.rect)
+	}
+	fn area(&self) -> i16 {
+	  	self.rect.area()
+	}
+	fn center(&self) -> Point {
+	  	self.rect.center()
+	}
+	fn top_left(&self) -> Point {
+	  	self.rect.top_left()
+	}
+	fn bottom_right(&self) -> Point {
+	  	self.rect.bottom_right()
+	}
+	fn get_x(&self) -> i16 {
+	    self.rect.x
+	}
+	fn get_y(&self) -> i16 {
+	    self.rect.y
+	}
+	fn get_w(&self) -> i16 {
+	    self.rect.w
+	}
+	fn get_h(&self) -> i16 {
+	    self.rect.h
+	}
+	/// Creates a new gene that's a copy of this one but with a differing
+	/// position.
+	fn set_pos(&self, new_x: i16, new_y: i16) -> Gene {
+	    let new_rect = Rect { x: new_x, y: new_y, 
+	    	w: self.rect.w, h: self.rect.h };
+	    Gene { rect: new_rect, gene_id: self.gene_id }
+	}
+	/// Sets the X position of the gene. Only works if the gene is mutable
+	fn set_x(&mut self, x: i16) {
+	    self.rect.x = x;
+	}
+	/// Sets the Y position of the gene. Only works if the gene is mutable
+	fn set_y(&mut self, y: i16) {
+		self.rect.y = y;
+	}
 
 }
 
@@ -265,7 +266,7 @@ impl Chromosome {
 	}
 	pub fn mutate<R: Rng>(&mut self, rng: &mut R){
 		if !self.bounding_box_fresh {
-			self.calculate_bounding_box();
+			self.calculate_bounding_box(); 
 		}
 		for i in 0..self.genes.len() {
 			if rng.next_f32() < MUTATION_CHANCE {
