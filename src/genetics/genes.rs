@@ -3,12 +3,20 @@
 use std::vec::Vec;
 use std::cmp::Ordering;
 use rand::Rng;
+use rand::distributions::{IndependentSample, Range};
 use mapping::shapes::{Point, Rect, Direction};
 use mapping::shapes::Direction::{Left, Right, Up, Down};
+use self::Mutation::{RotationMutation, PositionMutation};
 
 //TODO: Get rid of this hardcoding
 pub const CROSSOVER_CHANCE: f32 = 0.7;
 pub const MUTATION_CHANCE: f32 = 0.01;
+pub const MUTATIONS: [Mutation; 2] = [RotationMutation, PositionMutation];
+
+pub enum Mutation {
+	RotationMutation,
+	PositionMutation
+}
 
 /// Genes are rooms represented only by their bounding rectangle. A chromosome
 /// is made of these.
@@ -41,6 +49,24 @@ impl Ord for Gene {
 }
 
 impl Gene {
+  fn mutate<R: Rng>(&mut self, allowed_area: Rect, rng: &mut R) {
+  	let allowed_end = allowed_area.bottom_right();
+  	let allowed_x = Range::new(allowed_area.x, allowed_end.x); //TODO: make sure the whole gene stays in the area (not just the topleft corner)
+  	let allowed_y = Range::new(allowed_area.y, allowed_end.y);
+  	match rng.choose(&MUTATIONS) {
+  		Some(m) => match *m {
+  			RotationMutation => self.rot_in_place(),
+  			PositionMutation => { //TODO: Transition amount by chromosome fitness?
+  				self.set_x(allowed_x.ind_sample(rng));
+  				self.set_y(allowed_y.ind_sample(rng));
+  			}
+//  			_ => panic!("Got a mutation type that's not yet implemented!")
+// Having a mutation type that's not implemented and still being able to compile
+// seems to be impossible. Rust <3
+  		},
+  		None => panic!("For some reason the mutation list was empty!")
+  	};
+  }
   fn rect_cmp(&self, other: &Gene) -> Ordering {
   	self.rect.cmp(&other.rect)
   }
@@ -113,7 +139,7 @@ impl Chromosome {
 			bounding_box: Rect{ x: 0, y: 0, w: 0, h: 0 },
 			bounding_box_fresh: false
 		};
-		new_chromosome.calculate_fitness();
+		new_chromosome.relax();
 		new_chromosome
 	}
 	pub fn generate_initial<R: Rng>(genes: Vec<Gene>, rng: &mut R) 
@@ -173,6 +199,8 @@ impl Chromosome {
 			}
 		}
 		self.genes.sort();
+		self.bounding_box_fresh = false;
+		self.calculate_fitness();
 	}
 	fn calculate_bounding_box(&mut self) {//TODO:Store this in struct, make
 		let mut min_x = i16::max_value(); //this update as part of other fns
@@ -236,11 +264,15 @@ impl Chromosome {
 		(my_child, partners_child)
 	}
 	pub fn mutate<R: Rng>(&mut self, rng: &mut R){
+		if !self.bounding_box_fresh {
+			self.calculate_bounding_box();
+		}
 		for i in 0..self.genes.len() {
 			if rng.next_f32() < MUTATION_CHANCE {
-				
+				self.genes[i].mutate(self.bounding_box, rng);
 			}
 		}
+		self.relax();
 	}
 }
 
@@ -310,7 +342,7 @@ mod tests {
   fn mating_works_correctly() {
   	let rect1 = Rect { x: 2, y: 3, w: 5, h: 7 };
     let gene1 = Gene { rect: rect1, gene_id: 0 };
-    let rect2 = Rect { x: 1, y: 0, w: 3, h: 3 };
+    let rect2 = Rect { x: -2, y: -2, w: 3, h: 3 };
     let gene2 = Gene { rect: rect2, gene_id: 1};
     let mut gene3 = gene1;
     gene3.set_x(4);
