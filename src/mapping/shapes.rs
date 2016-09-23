@@ -1,5 +1,6 @@
 //! Module for all kinds of geometry
 
+/// Direction enums
 #[derive(Copy, Clone)]
 pub enum Direction {
   Left,
@@ -8,6 +9,7 @@ pub enum Direction {
   Down
 }
 
+/// A simple point struct
 pub struct Point {
   pub x: i16,
   pub y: i16
@@ -24,7 +26,8 @@ pub struct Rect {
 }
 
 impl Point {
-	/// Returns a vector from this point to the other point
+	/// Returns a vector (represented by a Point) from this point to the other 
+	/// point
 	pub fn diff(&self, point: Point) -> Point {
 		Point{ x: point.x - self.x, y: point.y - self.y }
 	}
@@ -36,19 +39,24 @@ impl Rect {
   pub fn rotate(&self) -> Rect {
     Rect { x: self.x, y: self.y, w: self.h, h: self.w }
   }
+  /// Checks if this rect collides (overlaps) with another rectangle.
   pub fn collides_with(&self, rect: Rect) -> bool {
     self.x < rect.x + rect.w && rect.x < self.x + self.w &&
     self.y < rect.y + rect.h && rect.y < self.y + self.h
   }
+  /// Returns this rect's area (w*h)
   pub fn area(&self) -> i16 {
   	self.w * self.h
   }
+  /// Gets the center point (x+w/2, y+h/2)
   pub fn center(&self) -> Point {
     Point { x: self.x + self.w / 2, y: self.y + self.h / 2 } 
   }
+  /// Gets the top left corner (x, y)
   pub fn top_left(&self) -> Point {
   	Point { x: self.x, y: self.y }
   }
+  /// Gets the bottom right corner (x+w, y+h)
   pub fn bottom_right(&self) -> Point {
   	Point { x: self.x + self.w, y: self.y + self.h }
   }

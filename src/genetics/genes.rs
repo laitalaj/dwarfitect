@@ -9,10 +9,14 @@ use mapping::shapes::Direction::{Left, Right, Up, Down};
 use self::Mutation::{RotationMutation, PositionMutation};
 
 //TODO: Get rid of this hardcoding
-pub const CROSSOVER_CHANCE: f32 = 0.7;
+/// The chance that, during mating, two genes will be switched
+pub const CROSSOVER_CHANCE: f32 = 0.5;
+/// The chance that, during mutation, a gene will mutate
 pub const MUTATION_CHANCE: f32 = 0.01;
+/// A list of all possible mutation types
 pub const MUTATIONS: [Mutation; 2] = [RotationMutation, PositionMutation];
 
+/// Possible mutation types; just plain old enums
 pub enum Mutation {
 	RotationMutation,
 	PositionMutation
@@ -37,18 +41,25 @@ pub struct Chromosome {
 }
 
 impl PartialOrd for Gene {
+	/// Gives an ordering the genes by gene ID
+	/// Uses Ord-trait's cmp() to do the comparison
 	fn partial_cmp(&self, other: &Gene) -> Option<Ordering> {
 		Some(self.cmp(other))
 	}
 }
 
 impl Ord for Gene {
+	/// Gives an ordering for the genes by gene ID
 	fn cmp(&self, other: &Gene) -> Ordering {
 		self.gene_id.cmp(&other.gene_id)
 	}
 }
 
 impl Gene {
+	/// Mutates the gene: Selects a mutation type randomly and modifies the gene
+	/// accordingly.
+	/// # Panics
+	/// Panics if, for some reason, there's no available choices in MUTATIONS
 	fn mutate<R: Rng>(&mut self, allowed_area: Rect, rng: &mut R) {
 	  	let allowed_end = allowed_area.bottom_right();
 	  	let allowed_x = Range::new(allowed_area.x, allowed_end.x); 
@@ -68,6 +79,7 @@ impl Gene {
 	  		None => panic!("For some reason the mutation list was empty!")
 	  	};
 	}
+	/// Gives an ordering according to the genes Rects ordering
 	fn rect_cmp(&self, other: &Gene) -> Ordering {
 	  	self.rect.cmp(&other.rect)
 	}
@@ -82,18 +94,24 @@ impl Gene {
 	fn rot_in_place(&mut self) {
 	    self.rect = self.rect.rotate();
 	}
+	/// Checks if this gene collides with another gene. Uses Rect's 
+	/// collides_with for this
 	fn collides_with(&self, gene: Gene) -> bool{
 	  	self.rect.collides_with(gene.rect)
 	}
+	/// Gives the area of this gene's rect
 	fn area(&self) -> i16 {
 	  	self.rect.area()
 	}
+	/// Gets the center point (x+w/2, y+h/2) of this gene's rect
 	fn center(&self) -> Point {
 	  	self.rect.center()
 	}
+	/// Gets the top left corner (x, y) of this gene's rect
 	fn top_left(&self) -> Point {
 	  	self.rect.top_left()
 	}
+	/// Gets the bottom right corner (x+w, y+h) of this gene's rect
 	fn bottom_right(&self) -> Point {
 	  	self.rect.bottom_right()
 	}
@@ -129,7 +147,8 @@ impl Gene {
 
 impl Chromosome {
 	
-	/// A constructor for the chromosome
+	/// A constructor for the chromosome. Creates the chromosome and relaxes
+	/// it.
 	pub fn new(genes: Vec<Gene>) -> Chromosome{
 		let mut total_area = 0;
 		for i in 0..genes.len() {
@@ -143,6 +162,8 @@ impl Chromosome {
 		new_chromosome.relax();
 		new_chromosome
 	}
+	/// Generates a more randomized (and perhaps more valid) initial chromosome
+	/// from given genes.
 	pub fn generate_initial<R: Rng>(genes: Vec<Gene>, rng: &mut R) 
 	-> Chromosome {
 		let mut shuffled_genes = genes.to_vec();
@@ -175,13 +196,15 @@ impl Chromosome {
 			shuffled_genes[i].set_x(x);
 			shuffled_genes[i].set_y(y);
 			if rng.next_f32() > 0.5 { //50% chance to rotate
-				shuffled_genes[i].rotate();
+				shuffled_genes[i].rot_in_place();
 			}
 		}
 		shuffled_genes.sort();
 		Chromosome::new(shuffled_genes)
 	}
-	fn relax(&mut self){ //TODO: This might not work as intended...
+	/// Relaxes the chromosome: moves every gene so that no two genes collide.
+	/// Recalculates fitness when done.
+	fn relax(&mut self){
 		self.genes.sort_by(|a, b| a.rect_cmp(b));
 		for i in 0..self.genes.len() {
 			for j in i+1..self.genes.len() {
@@ -203,6 +226,7 @@ impl Chromosome {
 		self.bounding_box_fresh = false;
 		self.calculate_fitness();
 	}
+	/// Calculates the smallest bounding box for this chromosome's genes
 	fn calculate_bounding_box(&mut self) {//TODO:Store this in struct, make
 		let mut min_x = i16::max_value(); //this update as part of other fns
 		let mut min_y = i16::max_value();
@@ -228,6 +252,11 @@ impl Chromosome {
 		Rect { x: min_x, y: min_y, w: max_x - min_x, h: max_y - min_y };
 		self.bounding_box_fresh = true;
 	}
+	/// Calculates this chromosome's fitness. Currently does this by comparing
+	/// area  used up by the genes to the area of the minimum bounding box
+	/// (so compact, rectangular designs flourish at the moment).
+	/// Calls calculate_bounding_box in the beginning if the bounding box is not
+	/// fresh.
 	pub fn calculate_fitness(&mut self) { //TODO: Actual fitness calculation
 		if !self.bounding_box_fresh {
 			self.calculate_bounding_box();
@@ -264,6 +293,8 @@ impl Chromosome {
 //		partners_child.relax();
 		(my_child, partners_child)
 	}
+	/// Mutates the chromosome: Calls Gene::mutate for each gene with 
+	/// probability equal to MUTATION_CHANCE. Relaxes the gene at the end.
 	pub fn mutate<R: Rng>(&mut self, rng: &mut R){
 		if !self.bounding_box_fresh {
 			self.calculate_bounding_box(); 
