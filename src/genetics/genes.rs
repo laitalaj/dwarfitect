@@ -31,7 +31,7 @@ pub struct Gene {
 }
 
 /// Chromosomes are possible solutions. They handle the genetic operations.
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 pub struct Chromosome {
   genes: Vec<Gene>,
   total_area: i16,
@@ -143,6 +143,12 @@ impl Gene {
 		self.rect.y = y;
 	}
 
+}
+
+impl PartialOrd for Chromosome {
+	fn partial_cmp(&self, other: &Chromosome) -> Option<Ordering> {
+		self.fitness.partial_cmp(&other.fitness)
+	}
 }
 
 impl Chromosome {
@@ -261,7 +267,9 @@ impl Chromosome {
 		if !self.bounding_box_fresh {
 			self.calculate_bounding_box();
 		}
-		self.fitness = self.total_area as f32 / self.bounding_box.area() as f32;
+		let raw_fitness = self.total_area as f32 
+		/ self.bounding_box.area() as f32;
+		self.fitness = 1.0 / raw_fitness.ln().abs(); //TODO: What if raw_fitness = 1?
 	}
 	/// The mating function: Two children are created by swapping this 
 	/// chromosomes genes with the partner chromosome's genes (aka. crossover).
