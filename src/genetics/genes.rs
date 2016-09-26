@@ -31,11 +31,11 @@ pub struct Gene {
 }
 
 /// Chromosomes are possible solutions. They handle the genetic operations.
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Clone, Debug)]
 pub struct Chromosome {
     genes: Vec<Gene>,
     total_area: i16,
-    fitness: f32,
+    pub fitness: f32,
     bounding_box: Rect,
     bounding_box_fresh: bool,
 }
@@ -56,6 +56,9 @@ impl Ord for Gene {
 }
 
 impl Gene {
+	pub fn new(rect: Rect, gene_id: i16) -> Gene{
+		Gene{ rect: rect, gene_id: gene_id }
+	}
     /// Mutates the gene: Selects a mutation type randomly and modifies the gene
     /// accordingly.
     /// # Panics
@@ -74,7 +77,7 @@ impl Gene {
                         self.set_x(allowed_x.ind_sample(rng));
                         self.set_y(allowed_y.ind_sample(rng));
                     }
-                    //  			_ => panic!("Got a mutation type that's not yet implemented!")
+                    // _ => panic!("Got a mutation type that's not yet implemented!")
                     // Having a mutation type that's not implemented and still being able to compile
                     // seems to be impossible. Rust <3
                 }
