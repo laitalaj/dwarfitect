@@ -27,3 +27,17 @@ uutuus paistaa l‰pi t‰ss‰ kohtaa; rustfmt, tyˆkalu jolla t‰m‰ tapahtuisi, bugitt
 olla liittym‰tt‰ Eclipseen). Bugifiksi‰ odotellessa toimiihan se k‰sipelill‰kin.
 
 Aikaa k‰ytetty 2h.
+
+**24.9.**
+Aloitin itse kasvatustoiminnallisuutta; luonnostelin funktioita, joiden perusteella lis‰‰ntyv‰t kromosomit valitaan yms.
+
+Aikaa k‰ytetty 2h.
+
+**26.9.**
+Siistin koodia, kirjoittelin dokumenaatiota ja testej‰ sek‰ viimeistelin nopeasti kasvatustoiminnallisuuden n‰in aamulla ennen dedist‰.
+P‰‰sin ensimm‰ist‰ kertaa hieman v‰‰nt‰m‰‰n k‰tt‰ Rustin elinaikojen kanssa, mutta n‰kˆj‰‰n selvisin suhteellisen kivuttomasti ja v‰hill‰
+ruhjeilla. rustfmt suostui formatoimaan kaiken paitsi breeding.rs:‰n, jippii! All in all, viikon tavoitteena oli saada jonkinlainen lis‰‰ntymistoiminnallisuus
+aikaiseksi, ja se onnistui tyylikk‰‰sti rimaa hipoen. Testit puuttuvat kasvatuksesta sek‰ monimutkaisemmista geneettisist‰ toiminnoista viel‰ kokonaan, 
+mutta se sek‰ toiminnallisuuden testailu olkoon ensi viikon murhe.
+
+Aikaa k‰ytetty 2,5h
