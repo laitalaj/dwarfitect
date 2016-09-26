@@ -3,8 +3,12 @@ use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
 use super::genes::{Gene, Chromosome};
 
+/// Percentage of population that should be kept alive for the next round of
+/// breeding
 pub const KEEP_ALIVE_PERCENTAGE: f32 = 0.1;
 
+/// Candidate is a container for a chromosome with a determined probability
+/// of selection for breeding
 #[derive(PartialEq, Debug)]
 struct Candidate<'a> {
   prob_range_end: f32,
@@ -12,17 +16,21 @@ struct Candidate<'a> {
 }
 
 impl<'a> Candidate<'a> {
+	/// Constructor for candidate
   fn new(prob_range_end: f32, chromosome: &'a Chromosome) -> Candidate {
     Candidate{ prob_range_end: prob_range_end, chromosome: chromosome }
   }
 }
 
 impl<'a> PartialOrd for Candidate<'a> {
+	/// Ordering for candidate, based on it's probability range end
   fn partial_cmp(&self, other: &Candidate) -> Option<Ordering> {
     self.prob_range_end.partial_cmp(&other.prob_range_end)
   }
 }
 
+/// Binary searches the candidate with the smallest probability range end that's
+/// larger than random_value
 fn search_candidate<'a>(candidates: &'a Vec<Candidate>, random_value: f32) 
 -> Option<&'a Candidate<'a>> {
 	let mut smallest_match: Option<&Candidate> = None;
@@ -40,8 +48,9 @@ fn search_candidate<'a>(candidates: &'a Vec<Candidate>, random_value: f32)
 	smallest_match
 }
 
-pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: u16, rng: &mut R)
--> Vec<Chromosome> {
+/// Generates an initial population with determined size
+pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: u16, 
+	rng: &mut R) -> Vec<Chromosome> {
   let mut population: Vec<Chromosome> = Vec::new();
   for _ in 0..size {
     population.push(Chromosome::generate_initial(genes.to_vec(), rng));
@@ -49,6 +58,8 @@ pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: u16, rng: &mu
   population
 }
 
+/// Breeds a population by 1 step; generates and mutates children and returns
+/// the next population.
 pub fn breed<R: Rng>(population: &Vec<Chromosome>, rng: &mut R) -> Vec<Chromosome>{
   let mut total_fitness = 0.0;
   let mut work_population = population.to_vec();
