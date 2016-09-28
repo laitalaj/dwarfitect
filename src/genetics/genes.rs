@@ -2,6 +2,7 @@
 
 use std::vec::Vec;
 use std::cmp::Ordering;
+use std::fmt::{Debug, Formatter, Result};
 use rand::Rng;
 use rand::distributions::{IndependentSample, Range};
 use mapping::shapes::{Point, Rect, Direction};
@@ -31,7 +32,7 @@ pub struct Gene {
 }
 
 /// Chromosomes are possible solutions. They handle the genetic operations.
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone)]
 pub struct Chromosome {
     genes: Vec<Gene>,
     total_area: i16,
@@ -164,6 +165,12 @@ impl PartialOrd for Chromosome {
     fn partial_cmp(&self, other: &Chromosome) -> Option<Ordering> {
         self.fitness.partial_cmp(&other.fitness)
     }
+}
+
+impl Debug for Chromosome {
+	fn fmt(&self, f: &mut Formatter) -> Result {
+		write!(f, "Chromosome with fitness {}", self.fitness)
+	}
 }
 
 impl Chromosome {

@@ -1,6 +1,7 @@
 use rand::Rng;
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
+use std::fmt::{Debug, Formatter, Result};
 use super::genes::{Gene, Chromosome};
 
 /// Percentage of population that should be kept alive for the next round of
@@ -9,10 +10,16 @@ pub const KEEP_ALIVE_PERCENTAGE: f32 = 0.1;
 
 /// Candidate is a container for a chromosome with a determined probability
 /// of selection for breeding
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq)]
 struct Candidate<'a> {
     prob_range_end: f32,
     pub chromosome: &'a Chromosome,
+}
+
+impl<'a> Debug for Candidate<'a> {
+	fn fmt(&self, f: &mut Formatter) -> Result {
+		write!(f, "Candidate with prob range end {}", self.prob_range_end)
+	}
 }
 
 impl<'a> Candidate<'a> {
@@ -39,14 +46,23 @@ fn search_candidate<'a>(candidates: &'a Vec<Candidate>, random_value: f32)
     let mut smallest_match: Option<&Candidate> = None;
     let mut min = 0;
     let mut max = candidates.len() - 1;
-    while min + 1 < max {
+    while min <= max {
         let candidate = &candidates[(min + max) / 2];
         if candidate.prob_range_end < random_value {
-            min = (min + max) / 2;
+            min = (min + max) / 2 + 1;
         } else {
             smallest_match = Some(candidate);
-            max = (min + max) / 2;
+            match max {
+            	0 => break, //Avoid infinite loop
+            	1 => max = 0, //If min is 0 and max is 1 (min+max)/2-1 is -1 -> can't do that!
+            	_ => max = (min + max) / 2 - 1
+            };
         }
+    }
+    if smallest_match == None {
+    	println!("{}", random_value);
+    	println!("{}, {}", min, max);
+    	println!("{:?}", candidates);
     }
     smallest_match
 }

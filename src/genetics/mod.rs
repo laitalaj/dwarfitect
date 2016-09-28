@@ -1,2 +1,2 @@
-mod genes;
-mod breeding;
+pub mod genes;
+pub mod breeding;

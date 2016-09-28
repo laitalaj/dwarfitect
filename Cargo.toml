@@ -3,5 +3,14 @@ name = "dwarfitect"
 version = "0.1.0"
 authors = ["laitalaj <julius.laitala@helsinki.fi>"]
 
+[lib]
+name = "dwarfilib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dwarfimain"
+path = "src/main.rs"
+
 [dependencies]
 rand = "*"
+image = "*"
