@@ -91,7 +91,11 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
     let mut candidates: Vec<Candidate> = Vec::new();
     let mut current_prob_range_end = 0.0;
     for i in 0..work_population.len() {
-        current_prob_range_end += work_population[i].fitness / total_fitness;
+        if i == work_population.len() - 1 { // Make sure float inaccuracy doesn't destroy things
+        	current_prob_range_end = 1.0;
+        } else {
+        	current_prob_range_end += work_population[i].fitness / total_fitness;
+        }
         candidates
         .push(Candidate::new(current_prob_range_end, &work_population[i]));
     }
