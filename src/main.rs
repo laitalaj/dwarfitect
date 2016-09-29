@@ -15,12 +15,12 @@ fn main() { //TODO: Move all this to actual functions
 	let mut rng = rand::thread_rng();
 	let mut population = breeding::generate_initial_population(
 		genes, 200, &mut rng);
-	for i in 0..1000 {
+	for i in 0..5001 {
 		if i % 100 == 0 {
 			population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
 			population.reverse();
 			println!("{:?}: {:?}", i, population[0]);
 		}
-		population = breeding::breed(&population, &mut rng);
+		population = breeding::breed(population, &mut rng);
 	}
 }

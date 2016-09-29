@@ -6,7 +6,7 @@ use super::genes::{Gene, Chromosome};
 
 /// Percentage of population that should be kept alive for the next round of
 /// breeding
-pub const KEEP_ALIVE_PERCENTAGE: f32 = 0.1;
+pub const KEEP_ALIVE_PERCENTAGE: f32 = 0.15;
 
 /// Candidate is a container for a chromosome with a determined probability
 /// of selection for breeding
@@ -79,7 +79,7 @@ pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: u16,
 
 /// Breeds a population by 1 step; generates and mutates children and returns
 /// the next population.
-pub fn breed<R: Rng>(population: &Vec<Chromosome>, rng: &mut R) 
+pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R) 
 -> Vec<Chromosome> {
     let mut total_fitness = 0.0;
     let mut work_population = population.to_vec();
@@ -96,15 +96,23 @@ pub fn breed<R: Rng>(population: &Vec<Chromosome>, rng: &mut R)
         .push(Candidate::new(current_prob_range_end, &work_population[i]));
     }
     let mut next_population: Vec<Chromosome> = Vec::new(); //TODO: Keeping the best of previous population
+    let keep_alive = work_population.len() as f32 * KEEP_ALIVE_PERCENTAGE;
+    let keep_alive_usize = keep_alive.round() as usize;
+    for i in 0..keep_alive_usize {
+    	next_population.push(work_population[i].clone());
+    }
     while next_population.len() < population.len() {
-        let candidate1 = search_candidate(&candidates, rng.next_f32()).unwrap();
+        let candidate1 = search_candidate(&candidates, rng.next_f32());
         // TODO: Handling None
-        let candidate2 = search_candidate(&candidates, rng.next_f32()).unwrap();
+        let candidate2 = search_candidate(&candidates, rng.next_f32());
+        let actual_candidate1 = candidate1.unwrap();
+        let actual_candidate2 = candidate2.unwrap();
+        let chromosome1 = actual_candidate1.chromosome;
+        let chromosome2 = actual_candidate2.chromosome;
         // TODO: Avoiding duplicates
-        let (mut child1, mut child2) = candidate1.chromosome
-            .mate(candidate2.chromosome, rng);
-        child1.mutate(rng);
-        child2.mutate(rng);
+        let (mut child1, mut child2) = chromosome1.mate(chromosome2, rng);
+		child1.mutate(rng);
+		child2.mutate(rng);
         next_population.push(child1);
         next_population.push(child2);
     }
