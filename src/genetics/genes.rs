@@ -34,7 +34,7 @@ pub struct Gene {
 /// Chromosomes are possible solutions. They handle the genetic operations.
 #[derive(PartialEq, Clone)]
 pub struct Chromosome {
-    genes: Vec<Gene>,
+    pub genes: Vec<Gene>, //TODO: Instead of pub, getters / setters?
     total_area: i16,
     pub fitness: f32,
     bounding_box: Rect,

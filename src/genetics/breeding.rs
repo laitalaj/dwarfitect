@@ -7,6 +7,8 @@ use super::genes::{Gene, Chromosome};
 /// Percentage of population that should be kept alive for the next round of
 /// breeding
 pub const KEEP_ALIVE_PERCENTAGE: f32 = 0.15;
+/// Percentage of population to kill when purging a population
+pub const PURGE_PERCENTAGE: f32 = 0.75;
 
 /// Candidate is a container for a chromosome with a determined probability
 /// of selection for breeding
@@ -123,6 +125,17 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
         }
     }
     next_population
+}
+
+pub fn purge<R: Rng>(population: &mut Vec<Chromosome>, rng: &mut R) {
+	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
+    population.reverse(); //TODO: Get rid of excess sorts
+	let kill = population.len() as f32 * PURGE_PERCENTAGE;
+    let kill_usize = kill.round() as usize;
+    let genes = population[0].genes.to_vec();
+    for i in kill_usize..population.len() {
+    	population[i] = Chromosome::generate_initial(genes.to_vec(), rng);
+    }
 }
 
 #[cfg(test)]
