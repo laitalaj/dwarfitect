@@ -169,7 +169,8 @@ impl PartialOrd for Chromosome {
 
 impl Debug for Chromosome {
 	fn fmt(&self, f: &mut Formatter) -> Result {
-		write!(f, "Chromosome with fitness {}", self.fitness)
+		write!(f, "Chromosome with fitness {}, bounding box area {}, 
+		total area {}", self.fitness, self.bounding_box.area(), self.total_area)
 	}
 }
 
@@ -300,7 +301,7 @@ impl Chromosome {
             self.calculate_bounding_box();
         }
         let raw_fitness = self.total_area as f32 / self.bounding_box.area() as f32;
-        self.fitness = 1.0 / raw_fitness.ln().abs(); //TODO: What if raw_fitness = 1?
+        self.fitness = 1.0 / raw_fitness.log10().abs(); //TODO: What if raw_fitness = 1?
     }
     /// The mating function: Two children are created by swapping this
     /// chromosomes genes with the partner chromosome's genes (aka. crossover).

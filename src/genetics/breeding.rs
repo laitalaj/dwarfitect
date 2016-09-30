@@ -118,7 +118,9 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
 		child1.mutate(rng);
 		child2.mutate(rng);
         next_population.push(child1);
-        next_population.push(child2);
+        if next_population.len() < population.len() {
+	        next_population.push(child2);
+        }
     }
     next_population
 }
@@ -167,7 +169,7 @@ mod tests {
         	vec![gene1, gene2, gene3, gene4], 100, &mut rng
         );
         assert_eq!(100, initial_pop.len());
-        let next_pop = breed(&initial_pop, &mut rng);
+        let next_pop = breed(initial_pop, &mut rng);
         assert_eq!(100, next_pop.len());
     }
 
