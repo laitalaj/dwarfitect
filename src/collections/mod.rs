@@ -15,8 +15,8 @@ fn oom() {
 	exit(-666); //"Some random number"
 }
 
-/// A runtime-resizable piece of memory. Allocates space from the heap for
-/// purposes determined by other objects.
+/// A runtime-resizable piece of memory. Handles allocating and deallocating 
+/// space from the heap for purposes determined by other objects.
 pub struct ResizableMemory<T> {
 	pub ptr: Unique<T>,
 	pub cap: usize
@@ -76,6 +76,20 @@ impl<T> ResizableMemory<T> {
 	}
 }
 
+impl<T> Drop for ResizableMemory<T> {
+	/// Frees the memory, doesn't try to drop the contents
+	fn drop(&mut self) {
+		if self.cap != 0 {
+			let align = mem::align_of::<T>();
+			let element_size = mem::size_of::<T>();
+			let bytes = element_size * self.cap;
+			unsafe {
+				heap::deallocate(*self.ptr as *mut _, bytes, align);
+			}
+		}
+	}
+}
+
 impl<T> Vector<T> {
 	fn new() -> Self {
 		Vector {
@@ -107,6 +121,16 @@ impl<T> Vector<T> {
 			unsafe {
 				Some(ptr::read(self.mem.ptr.offset(self.len as isize)))
 			}
+		}
+	}
+}
+
+impl<T> Drop for Vector<T> {
+	/// Drops all contents by popping them
+	/// Dropping the vec automatically also drops the contained resizable memory
+	fn drop(&mut self) {
+		while self.len > 0 {
+			let _ = self.pop();
 		}
 	}
 }
