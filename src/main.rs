@@ -6,6 +6,7 @@ use dwarfilib::mapping::shapes::Rect;
 use dwarfilib::genetics::genes::Gene;
 use dwarfilib::genetics::breeding;
 
+/// A makeshift main-function, used to test functionality.
 fn main() { //TODO: Move all this to actual functions
 	let mut genes: Vec<Gene> = Vec::new();
 	for i in 1..17 {

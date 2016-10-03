@@ -19,6 +19,7 @@ struct Candidate<'a> {
 }
 
 impl<'a> Debug for Candidate<'a> {
+	/// Debug output formatting for candidate
 	fn fmt(&self, f: &mut Formatter) -> Result {
 		write!(f, "Candidate with prob range end {}", self.prob_range_end)
 	}
@@ -127,6 +128,8 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
     next_population
 }
 
+/// Replaces number of worst chromosomes equal to PURGE_PERCENTAGE with initial
+/// chromosomes. Doesn't work too well as of now...
 pub fn purge<R: Rng>(population: &mut Vec<Chromosome>, rng: &mut R) {
 	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
     population.reverse(); //TODO: Get rid of excess sorts

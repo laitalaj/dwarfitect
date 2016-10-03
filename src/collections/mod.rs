@@ -83,7 +83,8 @@ impl<T> ResizableArray<T> {
 		}
 		self.len += 1;
 	}
-	/// Removes an item from the end of the array and returns it
+	/// Removes an item from the end of the array and returns it wrapped in an
+	/// option. Returns None if there are no items to return.
 	pub fn pop(&mut self) -> Option<T> {
 		if self.len == 0 {
 			None
