@@ -57,6 +57,7 @@ impl Ord for Gene {
 }
 
 impl Gene {
+	/// Constructor for gene
 	pub fn new(rect: Rect, gene_id: i16) -> Gene{
 		Gene{ rect: rect, gene_id: gene_id }
 	}
@@ -162,12 +163,14 @@ impl Gene {
 }
 
 impl PartialOrd for Chromosome {
+	/// Partial comparison to other chromosome based on chromosome's fitness
     fn partial_cmp(&self, other: &Chromosome) -> Option<Ordering> {
         self.fitness.partial_cmp(&other.fitness)
     }
 }
 
 impl Debug for Chromosome {
+	/// Debug output formatting for chromosome
 	fn fmt(&self, f: &mut Formatter) -> Result {
 		write!(f, "Chromosome with fitness {}, bounding box area {}, 
 		total area {}", self.fitness, self.bounding_box.area(), self.total_area)

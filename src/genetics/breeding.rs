@@ -13,16 +13,16 @@ pub const PURGE_PERCENTAGE: f32 = 0.75;
 /// Candidate is a container for a chromosome with a determined probability
 /// of selection for breeding
 #[derive(PartialEq)]
-struct Candidate<'a> {
+pub struct Candidate<'a> {
     prob_range_end: f32,
     pub chromosome: &'a Chromosome,
 }
 
 impl<'a> Debug for Candidate<'a> {
-	/// Debug output formatting for candidate
-	fn fmt(&self, f: &mut Formatter) -> Result {
-		write!(f, "Candidate with prob range end {}", self.prob_range_end)
-	}
+  /// Debug output formatting for candidate
+  fn fmt(&self, f: &mut Formatter) -> Result {
+    write!(f, "Candidate with prob range end {}", self.prob_range_end)
+  }
 }
 
 impl<'a> Candidate<'a> {
@@ -44,7 +44,7 @@ impl<'a> PartialOrd for Candidate<'a> {
 
 /// Binary searches the candidate with the smallest probability range end that's
 /// larger than random_value
-fn search_candidate<'a>(candidates: &'a Vec<Candidate>, random_value: f32) 
+pub fn search_candidate<'a>(candidates: &'a Vec<Candidate>, random_value: f32)
 -> Option<&'a Candidate<'a>> {
     let mut smallest_match: Option<&Candidate> = None;
     let mut min = 0;
@@ -56,23 +56,23 @@ fn search_candidate<'a>(candidates: &'a Vec<Candidate>, random_value: f32)
         } else {
             smallest_match = Some(candidate);
             match max {
-            	0 => break, //Avoid infinite loop
-            	1 => max = 0, //If min is 0 and max is 1 (min+max)/2-1 is -1 -> can't do that!
-            	_ => max = (min + max) / 2 - 1
+              0 => break, //Avoid infinite loop
+              1 => max = 0, //If min is 0 and max is 1 (min+max)/2-1 is -1 -> can't do that!
+              _ => max = (min + max) / 2 - 1
             };
         }
     }
     if smallest_match == None {
-    	println!("{}", random_value);
-    	println!("{}, {}", min, max);
-    	println!("{:?}", candidates);
+      println!("{}", random_value);
+      println!("{}, {}", min, max);
+      println!("{:?}", candidates);
     }
     smallest_match
 }
 
 /// Generates an initial population with determined size
-pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: u16, 
-	rng: &mut R) -> Vec<Chromosome> {
+pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: u16,
+  rng: &mut R) -> Vec<Chromosome> {
     let mut population: Vec<Chromosome> = Vec::new();
     for _ in 0..size {
         population.push(Chromosome::generate_initial(genes.to_vec(), rng));
@@ -82,7 +82,7 @@ pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: u16,
 
 /// Breeds a population by 1 step; generates and mutates children and returns
 /// the next population.
-pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R) 
+pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
 -> Vec<Chromosome> {
     let mut total_fitness = 0.0;
     let mut work_population = population.to_vec();
@@ -95,9 +95,9 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
     let mut current_prob_range_end = 0.0;
     for i in 0..work_population.len() {
         if i == work_population.len() - 1 { // Make sure float inaccuracy doesn't destroy things
-        	current_prob_range_end = 1.0;
+          current_prob_range_end = 1.0;
         } else {
-        	current_prob_range_end += work_population[i].fitness / total_fitness;
+          current_prob_range_end += work_population[i].fitness / total_fitness;
         }
         candidates
         .push(Candidate::new(current_prob_range_end, &work_population[i]));
@@ -106,7 +106,7 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
     let keep_alive = work_population.len() as f32 * KEEP_ALIVE_PERCENTAGE;
     let keep_alive_usize = keep_alive.round() as usize;
     for i in 0..keep_alive_usize {
-    	next_population.push(work_population[i].clone());
+      next_population.push(work_population[i].clone());
     }
     while next_population.len() < population.len() {
         let candidate1 = search_candidate(&candidates, rng.next_f32());
@@ -118,11 +118,11 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
         let chromosome2 = actual_candidate2.chromosome;
         // TODO: Avoiding duplicates
         let (mut child1, mut child2) = chromosome1.mate(chromosome2, rng);
-		child1.mutate(rng);
-		child2.mutate(rng);
+    child1.mutate(rng);
+    child2.mutate(rng);
         next_population.push(child1);
         if next_population.len() < population.len() {
-	        next_population.push(child2);
+          next_population.push(child2);
         }
     }
     next_population
@@ -131,13 +131,13 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
 /// Replaces number of worst chromosomes equal to PURGE_PERCENTAGE with initial
 /// chromosomes. Doesn't work too well as of now...
 pub fn purge<R: Rng>(population: &mut Vec<Chromosome>, rng: &mut R) {
-	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
+  population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
     population.reverse(); //TODO: Get rid of excess sorts
-	let kill = population.len() as f32 * PURGE_PERCENTAGE;
+  let kill = population.len() as f32 * PURGE_PERCENTAGE;
     let kill_usize = kill.round() as usize;
     let genes = population[0].genes.to_vec();
     for i in kill_usize..population.len() {
-    	population[i] = Chromosome::generate_initial(genes.to_vec(), rng);
+      population[i] = Chromosome::generate_initial(genes.to_vec(), rng);
     }
 }
 
@@ -146,11 +146,11 @@ mod tests {
 
     use super::*;
     use mapping::shapes::Rect;
-    use genetics::genes::Gene;
+    use genetics::genes::{Gene, Chromosome};
     use rand;
 
     #[test]
-    fn everything_doesnt_break() {
+    fn breed_returns_correctly_sized_population() {
         // TODO: Actual tests
         let rect1 = Rect {
             x: 2,
@@ -182,11 +182,31 @@ mod tests {
         let gene4 = Gene::new(rect4, 3);
         let mut rng = rand::thread_rng();
         let initial_pop = generate_initial_population(
-        	vec![gene1, gene2, gene3, gene4], 100, &mut rng
+          vec![gene1, gene2, gene3, gene4], 100, &mut rng
         );
         assert_eq!(100, initial_pop.len());
         let next_pop = breed(initial_pop, &mut rng);
         assert_eq!(100, next_pop.len());
+    }
+
+    #[test]
+    fn search_candidate_finds_correct_candidate() {
+      let rect = Rect { x:0, y:0, w:2, h:2 };
+      let mut chromosome = Chromosome::new(vec![Gene::new(rect, 1)]);
+      let mut chromosomes = Vec::new();
+      let mut candidates = Vec::new();
+      for _ in 0..10 {
+        let new_chromosome = chromosome.clone();
+        chromosomes.push(new_chromosome);
+        chromosome.genes.push(Gene::new(rect, 1));
+      }
+      let mut prob = 0.0;
+      for i in 0..chromosomes.len() {
+        prob += 1.0 / chromosomes.len() as f32;
+        candidates.push(Candidate::new(prob, &chromosomes[i]));
+      }
+      let found_candidate = search_candidate(&candidates, 0.75).unwrap();
+      assert_eq!(8, found_candidate.chromosome.genes.len());
     }
 
 }
