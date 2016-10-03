@@ -15,28 +15,33 @@ fn oom() {
 	exit(-666); //"Some random number"
 }
 
-/// A runtime-resizable array
-pub struct ResizableArray<T> {
-	ptr: Unique<T>,
-	cap: usize,
+/// A runtime-resizable piece of memory. Allocates space from the heap for
+/// purposes determined by other objects.
+pub struct ResizableMemory<T> {
+	pub ptr: Unique<T>,
+	pub cap: usize
+}
+
+/// A implementation of vector, a growable array-type list
+pub struct Vector<T> {
+	mem: ResizableMemory<T>,
 	len: usize
 }
 
-impl<T> ResizableArray<T> {
+impl<T> ResizableMemory<T> {
 	/// Creates a new resizable array
 	/// # Panics
 	/// Panics on zero-sized types
 	fn new() -> Self {
 		assert!(mem::size_of::<T>() != 0, "Zero-sized types not supported yet!");
 		unsafe {
-			ResizableArray {
+			ResizableMemory {
 				ptr: Unique::new(heap::EMPTY as *mut _),
-				cap: 0,
-				len: 0
+				cap: 0
 			}
 		}
 	}
-	/// Grows the array to double the size, or size 1 if cap was 0.
+	/// Grows the memory to double the size, or size 1 if cap was 0.
 	/// # Panics
 	/// Panics on capacity overflow (if new capacity > isize::max_value())
 	/// # Aborts
@@ -69,29 +74,38 @@ impl<T> ResizableArray<T> {
 			self.cap = new_cap;
 		}
 	}
-	/// Pushes an item to the end of the array
+}
+
+impl<T> Vector<T> {
+	fn new() -> Self {
+		Vector {
+			mem: ResizableMemory::new(),
+			len: 0
+		}
+	}
+	/// Pushes an item to the end of the vec
 	/// # Panics
 	/// Panics on capacity overflow (if new capacity > isize::MAX)
 	/// # Aborts
 	/// Aborts if out of memory
 	pub fn push(&mut self, item: T) {
-		if self.len == self.cap {
-			self.grow();
+		if self.len == self.mem.cap {
+			self.mem.grow();
 		}
 		unsafe {
-			ptr::write(self.ptr.offset(self.len as isize), item);
+			ptr::write(self.mem.ptr.offset(self.len as isize), item);
 		}
 		self.len += 1;
 	}
-	/// Removes an item from the end of the array and returns it wrapped in an
-	/// option. Returns None if there are no items to return.
+	/// Removes an item from the end of the vec and returns it wrapped in an
+	/// Option. Returns None if there are no items to return.
 	pub fn pop(&mut self) -> Option<T> {
 		if self.len == 0 {
 			None
 		} else {
 			self.len -= 1;
 			unsafe {
-				Some(ptr::read(self.ptr.offset(self.len as isize)))
+				Some(ptr::read(self.mem.ptr.offset(self.len as isize)))
 			}
 		}
 	}
@@ -104,14 +118,14 @@ mod tests {
 	
 	#[test]
 	fn push_pop_work() {
-		let mut array = ResizableArray::new();
+		let mut vec = Vector::new();
 		for i in 0..10 {
-			array.push(i);
+			vec.push(i);
 		}
 		for i in 0..11 {
 			match i {
-				10 => assert_eq!(None, array.pop()),
-				_ => assert_eq!(9 - i, array.pop().unwrap())
+				10 => assert_eq!(None, vec.pop()),
+				_ => assert_eq!(9 - i, vec.pop().unwrap())
 			}
 		}
 	}

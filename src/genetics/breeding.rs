@@ -151,7 +151,6 @@ mod tests {
 
     #[test]
     fn breed_returns_correctly_sized_population() {
-        // TODO: Actual tests
         let rect1 = Rect {
             x: 2,
             y: 3,
