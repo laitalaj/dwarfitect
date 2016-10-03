@@ -36,3 +36,12 @@ Ohessa tein vertaisarvioinnit.
 
 Aikaa käytetty noin 2,5h
 
+**3.10.**
+Vaihdoin rustupissa nightlystä stableen ja takaisin nightlyyn, ja nyt kaikki näyttäisi maagisesti toimivan. Sain siis vihdoinkin oman
+alkeellisen tietorakenneimplementaation compiloimaan ja testautumaan. Voi pojat, näitä lisää ensi viikolla.
+
+Tämän lisäksi kirjoittelin vähän testejä ja dokumentaatiokommentteja.
+
+Aikaa käytetty noin 1,5h
+
+Aikaa käytetty yhteensä tällä viikolla noin 11h
