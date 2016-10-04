@@ -29,10 +29,15 @@ pub struct Vector<T> {
     len: usize,
 }
 
+/// A two-dimensional fixed-size array
+pub struct Matrix<T> {
+  mem: ResizableMemory<Option<T>>,
+  w: usize,
+  h: usize
+}
+
 impl<T> ResizableMemory<T> {
-    /// Creates a new resizable array
-    /// # Panics
-    /// Panics on zero-sized types
+    /// Creates a new resizable memory
     fn new() -> Self {
         unsafe {
             let cap = if mem::size_of::<T>() == 0 {
@@ -45,6 +50,28 @@ impl<T> ResizableMemory<T> {
                 cap: cap,
             }
         }
+    }
+    /// Creates a new resizable memory with specified capacity.
+    /// # Panics
+    /// Panics if type is zero-sized. Zero-sized types take no space, so you
+    /// shouldn't use this constructor for them.
+    /// # Aborts
+    /// Aborts if out of memory
+    fn new_with_size(cap: usize) -> Self {
+      let element_size = mem::size_of::<T>();
+      assert!(element_size != 0, "Tried to use new_with_size for ZST vector!");
+      let align = mem::align_of::<T>();
+      let bytes = element_size * cap;
+      unsafe {
+        let ptr = heap::allocate(bytes, align);
+        if ptr.is_null() {
+          oom();
+        }
+        ResizableMemory {
+          ptr: Unique::new(ptr as *mut _),
+          cap: cap
+        }
+      }
     }
     /// Grows the memory to double the size, or size 1 if cap was 0.
     /// # Panics
@@ -59,9 +86,12 @@ impl<T> ResizableMemory<T> {
             // getting here means that the vec is overfull.
             let align = mem::align_of::<T>();
             let (new_cap, ptr) = if self.cap == 0 {
-                let ptr = heap::allocate(element_size, align);
-                (1, ptr)
+              // Grow to capacity 8 immeadetly
+              let bytes = 8 * element_size;
+                let ptr = heap::allocate(bytes, align);
+                (8, ptr)
             } else {
+              // Double the size
                 let new_cap = self.cap * 2;
                 let old_bytes = self.cap * element_size;
                 assert!(old_bytes <= (isize::max_value() as usize) / 2,
@@ -103,8 +133,20 @@ impl<T> Vector<T> {
     fn new() -> Self {
         Vector {
             mem: ResizableMemory::new(),
-            len: 0,
+            len: 0
         }
+    }
+    /// Creates a new vector with specified capacity
+    /// # Panics
+    /// Panics on zero-sized types. You shouldn't be specifying capacity for
+    /// vectors containing ZSTs (as they take no space!)
+    /// # Aborts
+    /// Aborts if out of memory
+    fn new_with_size(cap: usize) -> Self {
+      Vector {
+        mem: ResizableMemory::new_with_size(cap),
+        len: 0
+      }
     }
     /// Pushes an item to the end of the vec
     /// # Panics
@@ -206,5 +248,29 @@ mod tests {
             vec.push(ZeroSized {});
         }
         assert_eq!(usize::max_value(), vec.get_cap());
+    }
+
+    #[test]
+    fn vector_allocates_correct_amount_of_space() {
+      let mut vec1 = Vector::new();
+      for i in 0..10 {
+        match i {
+          0 => assert_eq!(0, vec1.get_cap()),
+          1...8 => assert_eq!(8, vec1.get_cap()),
+          9 => assert_eq!(16, vec1.get_cap()),
+          _ => panic!("Something is terribly wrong with the test!")
+        }
+        vec1.push(i);
+      }
+      let mut vec2 = Vector::new_with_size(16);
+      assert_eq!(16, vec2.get_cap());
+      for i in 0..18 {
+      	match i {
+          0...16 => assert_eq!(16, vec2.get_cap()),
+          17 => assert_eq!(32, vec2.get_cap()),
+          _ => panic!("Something is terribly wrong with the test!")
+        }
+      	vec2.push(i);
+      }
     }
 }
