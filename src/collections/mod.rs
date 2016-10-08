@@ -32,8 +32,8 @@ pub struct Vector<T> {
 /// A two-dimensional fixed-size array
 pub struct Matrix<T> {
   mem: Vector<Option<T>>,
-  w: usize,
-  h: usize
+  pub w: usize,
+  pub h: usize
 }
 
 impl<T> ResizableMemory<T> {
@@ -209,7 +209,7 @@ impl<T> DerefMut for Vector<T> {
 }
 
 impl<T> Matrix<T> {
-	fn new(width: usize, height: usize) -> Self{
+	pub fn new(width: usize, height: usize) -> Self{
 		let mut mem = Vector::new_with_size(width * height);
 		for _ in 0..width*height {
 			mem.push(None);
@@ -220,10 +220,10 @@ impl<T> Matrix<T> {
 			h: height
 		}
 	}
-	fn get(&self, x: usize, y: usize) -> &Option<T> {
+	pub fn get(&self, x: usize, y: usize) -> &Option<T> {
 		&self.mem[y * self.w + x]
 	}
-	fn set(&mut self, x: usize, y: usize, item: T) {
+	pub fn set(&mut self, x: usize, y: usize, item: T) {
 		self.mem[y * self.w + x] = Some(item);
 	}
 }
