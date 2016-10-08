@@ -2,6 +2,7 @@ use std::io::{Write, Error};
 use std::fs::File;
 use collections::Matrix;
 
+/// Saves a character matrix to a file
 pub fn save(matrix: Matrix<char>) -> Result<(), Error>{
 	let mut output = String::new();
 	for y in 0..matrix.h {
