@@ -31,7 +31,7 @@ pub struct Vector<T> {
 
 /// A two-dimensional fixed-size array
 pub struct Matrix<T> {
-  mem: ResizableMemory<Option<T>>,
+  mem: Vector<Option<T>>,
   w: usize,
   h: usize
 }
@@ -172,7 +172,9 @@ impl<T> Vector<T> {
             unsafe { Some(ptr::read(self.mem.ptr.offset(self.len as isize))) }
         }
     }
-
+    fn len(&self) -> usize {
+    	self.len
+    }
     fn get_cap(&self) -> usize {
         self.mem.cap
     }
@@ -191,6 +193,7 @@ impl<T> Drop for Vector<T> {
 impl<T> Deref for Vector<T> {
     type Target = [T];
     /// Returns a slice corresponding to the vector, magically enabling indexing
+    /// Also enables sorting.
     fn deref(&self) -> &[T] {
         unsafe { slice::from_raw_parts(*self.mem.ptr, self.len) }
     }
@@ -199,9 +202,30 @@ impl<T> Deref for Vector<T> {
 impl<T> DerefMut for Vector<T> {
     /// Returns a mutable slice corresponding to the vector, magically enabling
     /// indexing
+    /// Also enables sorting.
     fn deref_mut(&mut self) -> &mut [T] {
         unsafe { slice::from_raw_parts_mut(*self.mem.ptr, self.len) }
     }
+}
+
+impl<T> Matrix<T> {
+	fn new(width: usize, height: usize) -> Self{
+		let mut mem = Vector::new_with_size(width * height);
+		for _ in 0..width*height {
+			mem.push(None);
+		}
+		Matrix {
+			mem: mem,
+			w: width,
+			h: height
+		}
+	}
+	fn get(&self, x: usize, y: usize) -> &Option<T> {
+		&self.mem[y * self.w + x]
+	}
+	fn set(&mut self, x: usize, y: usize, item: T) {
+		self.mem[y * self.w + x] = Some(item);
+	}
 }
 
 #[cfg(test)]
@@ -210,7 +234,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn push_pop_work() {
+    fn vector_push_pop_work() {
         let mut vec = Vector::new();
         for i in 0..10 {
             vec.push(i);
@@ -224,7 +248,7 @@ mod tests {
     }
 
     #[test]
-    fn indexing_works() {
+    fn vector_indexing_works() {
         let mut vec = Vector::new();
         for i in 0..10 {
             vec.push(i * 2);
@@ -241,7 +265,7 @@ mod tests {
     }
 
     #[test]
-    fn zero_sized_types_work() {
+    fn vector_zero_sized_types_work() {
         struct ZeroSized; // No fields = no size!
         let mut vec = Vector::new();
         for _ in 0..10 {
@@ -272,5 +296,51 @@ mod tests {
         }
       	vec2.push(i);
       }
+    }
+    
+    #[test]
+    fn vector_sort_works() {
+    	let mut vec = Vector::new();
+    	for i in 0..10 {
+    		vec.push(i * 7 % 5);
+    	}
+    	vec.sort();
+    	let mut previous = vec[0];
+    	for i in 1..vec.len(){
+    		if previous > vec[i] {
+    			panic!("Sort didn't work");
+    		} else {
+    			previous = vec[i];
+    		}
+    	}
+    }
+    
+    #[test]
+    fn matrix_constructor_works() {
+    	let w = 7;
+    	let h = 9;
+    	let mat: Matrix<usize> = Matrix::new(w, h);
+    	for x in 0..w {
+    		for y in 0..h {
+    			assert_eq!(None, *mat.get(x, y));
+    		}
+    	}
+    }
+    
+    #[test]
+    fn matrix_set_works() {
+    	let w = 7;
+    	let h = 9;
+    	let mut mat = Matrix::new(w, h);
+    	for x in 0..w {
+    		for y in 0..h {
+    			mat.set(x, y, x * 2 + y);
+    		}
+    	}
+    	for x in 0..w {
+    		for y in 0..h {
+    			assert_eq!(x * 2 + y, mat.get(x, y).unwrap());
+    		}
+    	}
     }
 }
