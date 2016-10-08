@@ -7,8 +7,11 @@ pub fn save(matrix: Matrix<char>) -> Result<(), Error>{
 	let mut output = String::new();
 	for y in 0..matrix.h {
 		for x in 0..matrix.w {
-			print!("{:?}", matrix.get(x, y));
-			output.push(matrix.get(x, y).unwrap());
+			output.push(match *matrix.get(x, y) {
+					Some(c) => c,
+					None => ' '
+			}
+			);
 		}
 		output.push('\r'); // DOS-compatible line change
 		output.push('\n');
@@ -33,7 +36,6 @@ mod tests {
 		for y in 0..h {
 			for x in 0..w {
 				let char = char::from_u32((97 + y*w + x) as u32).unwrap();
-				print!("{}", char);
 				mat.set(x, y, char);
 			}
 		}

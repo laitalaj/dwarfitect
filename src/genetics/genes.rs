@@ -7,6 +7,7 @@ use rand::Rng;
 use rand::distributions::{IndependentSample, Range};
 use mapping::shapes::{Point, Rect, Direction};
 use mapping::shapes::Direction::{Left, Right, Up, Down};
+use mapping::rooms::{Room, Layout};
 use self::Mutation::{RotationMutation, PositionMutation};
 
 // TODO: Get rid of this hardcoding
@@ -159,6 +160,13 @@ impl Gene {
     /// Sets the Y position of the gene. Only works if the gene is mutable
     fn set_y(&mut self, y: i16) {
         self.rect.y = y;
+    }
+    /// Converts the gene into a room (shrinks it down a bit)
+    pub fn as_room(&self) -> Room {
+    	let mut new_rect = self.rect;
+    	new_rect.w -= 1;
+    	new_rect.h -= 1;
+    	Room::new(new_rect)
     }
 }
 
@@ -347,6 +355,15 @@ impl Chromosome {
             }
         }
         self.relax();
+    }
+    /// Converts the chromosome into a layout; converts all the genes into rooms
+    /// and returns a new layout
+    pub fn as_layout(&self) -> Layout {
+    	let mut rooms = Vec::new();
+    	for i in 0..self.genes.len() {
+    		rooms.push(self.genes[i].as_room());
+    	}
+    	Layout::new(rooms)
     }
 }
 

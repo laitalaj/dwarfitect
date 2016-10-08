@@ -1,11 +1,11 @@
 use mapping::shapes::{Rect, Point};
 use collections::Matrix;
 
-struct Room {
+pub struct Room {
     rect: Rect,
 }
 
-struct Layout {
+pub struct Layout {
     rooms: Vec<Room>,
 }
 
