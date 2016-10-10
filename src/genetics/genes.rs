@@ -122,7 +122,7 @@ impl Gene {
     	Room::new(new_rect)
     }
     /// Gives an ordering based on distance from origo
-    pub fn origo_cmp(&self, other: Gene) -> Ordering {
+    pub fn origo_cmp(&self, other: &Gene) -> Ordering {
     	let origo = Point::new(0, 0);
     	let my_dist = origo.dist(self.center());
     	let other_dist = origo.dist(other.center());
@@ -210,7 +210,7 @@ impl Chromosome {
     /// Relaxes the chromosome: moves every gene so that no two genes collide.
     /// Recalculates fitness when done.
     fn relax(&mut self) {
-        self.genes.sort_by(|a, b| a.rect_cmp(b));
+        self.genes.sort_by(|a, b| a.origo_cmp(b));
         for i in 0..self.genes.len() {
             for j in i + 1..self.genes.len() {
             	if self.genes[j].gene_id == 0 { //TODO: Refactor!
@@ -218,10 +218,10 @@ impl Chromosome {
                     let top_left2 = self.genes[i].top_left();
                     let diff = top_left2.diff(bottom_right1);
                     if diff.x.abs() < diff.y.abs() {
-                        let new_x = self.genes[i].get_x() + diff.x.abs();
+                        let new_x = self.genes[i].get_x() + diff.x;
                         self.genes[i].set_x(new_x);
                     } else {
-                        let new_y = self.genes[i].get_y() + diff.y.abs();
+                        let new_y = self.genes[i].get_y() + diff.y;
                         self.genes[i].set_y(new_y);
                     }
             	}
@@ -230,10 +230,10 @@ impl Chromosome {
                     let top_left2 = self.genes[j].top_left();
                     let diff = top_left2.diff(bottom_right1);
                     if diff.x.abs() < diff.y.abs() {
-                        let new_x = self.genes[j].get_x() + diff.x.abs();
+                        let new_x = self.genes[j].get_x() + diff.x;
                         self.genes[j].set_x(new_x);
                     } else {
-                        let new_y = self.genes[j].get_y() + diff.y.abs();
+                        let new_y = self.genes[j].get_y() + diff.y;
                         self.genes[j].set_y(new_y);
                     }
                 }
@@ -491,47 +491,16 @@ mod tests {
 
     #[test]
     fn no_intersections_after_relaxing() {
-        let rect1 = Rect {
-            x: 2,
-            y: 3,
-            w: 5,
-            h: 7,
-        };
-        let gene1 = Gene {
-            rect: rect1,
-            gene_id: 0,
-        };
-        let rect2 = Rect {
-            x: 1,
-            y: 0,
-            w: 3,
-            h: 3,
-        };
-        let gene2 = Gene {
-            rect: rect2,
-            gene_id: 1,
-        };
-        let rect3 = Rect {
-            x: -2,
-            y: 5,
-            w: 5,
-            h: 10,
-        };
-        let gene3 = Gene {
-            rect: rect3,
-            gene_id: 2,
-        };
-        let rect4 = Rect {
-            x: 0,
-            y: -7,
-            w: 12,
-            h: 8,
-        };
-        let gene4 = Gene {
-            rect: rect4,
-            gene_id: 3,
-        };
-        let mut genes = Chromosome::new(vec![gene1, gene2, gene3, gene4]);
+    	let mut gene_vec = Vec::new();
+    	gene_vec.push(Gene::new(Rect { x: -2, y: -2, w: 5, h: 5 }, 0));
+        for i in 1..100 {
+        	let x = (i*13)%7 - 4;
+        	let y = (i*17)%7 - 4;
+        	let w = (i*5)%11 + 3;
+        	let h = (i*7)%11 + 3;
+        	gene_vec.push(Gene::new(Rect { x: x, y: y, w: w, h: h }, i));
+        }
+        let mut genes = Chromosome::new(gene_vec);
         genes.relax();
         for i in 0..genes.genes.len() {
             for j in i + 1..genes.genes.len() {
