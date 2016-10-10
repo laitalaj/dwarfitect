@@ -8,7 +8,7 @@ use super::genes::{Gene, Chromosome};
 /// breeding
 pub const KEEP_ALIVE_PERCENTAGE: f32 = 0.15;
 /// Percentage of population to kill when purging a population
-pub const PURGE_PERCENTAGE: f32 = 0.75;
+pub const PURGE_PERCENTAGE: f32 = 0.7;
 
 /// Candidate is a container for a chromosome with a determined probability
 /// of selection for breeding

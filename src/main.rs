@@ -12,13 +12,13 @@ fn main() { //TODO: Move all this to actual functions
 	let mut genes: Vec<Gene> = Vec::new();
 	for i in 1..17 {
 		let rect = Rect{ x: 0, y: 0, w: (i*13)%7 + 4, h: (i*5)%7 + 4};
-		genes.push(Gene::new(rect, i));
+		genes.push(Gene::new(rect, i - 1));
 	}
 	let mut rng = rand::thread_rng();
 	let mut population = breeding::generate_initial_population(
-		genes, 300, &mut rng);
+		genes, 500, &mut rng);
 	let mut last_fitness: f32 = 0.0;
-	for i in 0..4001 {
+	for i in 0..3001 {
 		population = breeding::breed(population, &mut rng);
 		if i % 200 == 0 {
 			population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));

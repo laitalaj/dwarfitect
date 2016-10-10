@@ -27,6 +27,14 @@ pub struct Rect {
 }
 
 impl Point {
+	pub fn new(x: isize, y: isize) -> Self {
+		Point { x: x, y: y }
+	}
+	/// Returns distance between two points
+	pub fn dist(&self, other: Point) -> f32 {
+		let diff = self.diff(other);
+		((diff.x as f32).powi(2) + (diff.y as f32).powi(2)).sqrt()
+	}
     /// Returns a vector (represented by a Point) from this point to the other
     /// point
     pub fn diff(&self, point: Point) -> Point {

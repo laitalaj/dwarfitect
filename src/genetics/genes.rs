@@ -121,6 +121,13 @@ impl Gene {
     	new_rect.h -= 1;
     	Room::new(new_rect)
     }
+    /// Gives an ordering based on distance from origo
+    pub fn origo_cmp(&self, other: Gene) -> Ordering {
+    	let origo = Point::new(0, 0);
+    	let my_dist = origo.dist(self.center());
+    	let other_dist = origo.dist(other.center());
+    	my_dist.partial_cmp(&other_dist).unwrap_or(Ordering::Equal)
+    }
 }
 
 impl PartialOrd for Chromosome {
