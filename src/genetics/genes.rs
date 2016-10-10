@@ -29,14 +29,14 @@ pub enum Mutation {
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub struct Gene {
     rect: Rect,
-    gene_id: i16,
+    gene_id: isize,
 }
 
 /// Chromosomes are possible solutions. They handle the genetic operations.
 #[derive(PartialEq, Clone)]
 pub struct Chromosome {
     pub genes: Vec<Gene>, //TODO: Instead of pub, getters / setters?
-    total_area: i16,
+    total_area: isize,
     pub fitness: f32,
     bounding_box: Rect,
     bounding_box_fresh: bool,
@@ -62,7 +62,7 @@ impl Ord for Gene {
 
 impl Gene {
 	/// Constructor for gene
-	pub fn new(rect: Rect, gene_id: i16) -> Gene{
+	pub fn new(rect: Rect, gene_id: isize) -> Gene{
 		Gene{ rect: rect, gene_id: gene_id }
 	}
     /// Mutates the gene: Selects a mutation type randomly and modifies the gene
@@ -102,7 +102,7 @@ impl Gene {
     }
     /// Creates a new gene that's a copy of this one but with a differing
     /// position.
-    fn set_pos(&self, new_x: i16, new_y: i16) -> Gene {
+    fn set_pos(&self, new_x: isize, new_y: isize) -> Gene {
         let new_rect = Rect {
             x: new_x,
             y: new_y,
@@ -168,7 +168,7 @@ impl Chromosome {
         rng.shuffle(&mut shuffled_genes);
         shuffled_genes[0].set_x(0);
         shuffled_genes[0].set_y(0);
-        let mut places_to_go: Vec<(i16, i16, Direction)> = Vec::new();
+        let mut places_to_go: Vec<(isize, isize, Direction)> = Vec::new();
         places_to_go.push((0, 0, Left));
         places_to_go.push((0, 0, Up));
         places_to_go.push((shuffled_genes[0].get_x(), 0, Right));
@@ -239,10 +239,10 @@ impl Chromosome {
     /// Calculates the smallest bounding box for this chromosome's genes
     fn calculate_bounding_box(&mut self) {
         // TODO:Store this in struct, make
-        let mut min_x = i16::max_value(); //this update as part of other fns
-        let mut min_y = i16::max_value();
-        let mut max_x = i16::min_value();
-        let mut max_y = i16::min_value();
+        let mut min_x = isize::max_value(); //this update as part of other fns
+        let mut min_y = isize::max_value();
+        let mut max_x = isize::min_value();
+        let mut max_y = isize::min_value();
         for i in 0..self.genes.len() {
             let top_left = self.genes[i].top_left();
             let bottom_right = self.genes[i].bottom_right();
@@ -581,7 +581,7 @@ mod tests {
         let mut genes = Chromosome::new(vec![gene1, gene2, gene3, gene4]);
         genes.relax();
         for i in 0..genes.genes.len() {
-            assert_eq!(i as i16, genes.genes[i].gene_id);
+            assert_eq!(i as isize, genes.genes[i].gene_id);
         }
     }
 

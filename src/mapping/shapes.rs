@@ -12,18 +12,18 @@ pub enum Direction {
 /// A simple point struct
 #[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug)]
 pub struct Point {
-    pub x: i16,
-    pub y: i16,
+    pub x: isize,
+    pub y: isize,
 }
 
 /// A simple rectangle struct
 /// (x, y) is the top left corner, w is width, h is height
 #[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug)]
 pub struct Rect {
-    pub x: i16,
-    pub y: i16,
-    pub w: i16,
-    pub h: i16,
+    pub x: isize,
+    pub y: isize,
+    pub w: isize,
+    pub h: isize,
 }
 
 impl Point {
@@ -54,7 +54,7 @@ impl Rect {
         rect.y < self.y + self.h
     }
     /// Returns this rect's area (w*h)
-    pub fn area(&self) -> i16 {
+    pub fn area(&self) -> isize {
         self.w * self.h
     }
     /// Gets the center point (x+w/2, y+h/2)
@@ -100,7 +100,7 @@ macro_rules! impl_rect_methods {
 		        self.$rect.collides_with(other.$rect)
 		    }
 		    /// Gives the area of this structs's rect
-		    fn area(&self) -> i16 {
+		    fn area(&self) -> isize {
 		        self.$rect.area()
 		    }
 		    /// Gets the center point (x+w/2, y+h/2) of this structs's rect
@@ -115,26 +115,26 @@ macro_rules! impl_rect_methods {
 		    fn bottom_right(&self) -> Point {
 		        self.$rect.bottom_right()
 		    }
-		    fn get_x(&self) -> i16 {
+		    fn get_x(&self) -> isize {
 		        self.$rect.x
 		    }
-		    fn get_y(&self) -> i16 {
+		    fn get_y(&self) -> isize {
 		        self.$rect.y
 		    }
-		    fn get_w(&self) -> i16 {
+		    fn get_w(&self) -> isize {
 		        self.$rect.w
 		    }
-		    fn get_h(&self) -> i16 {
+		    fn get_h(&self) -> isize {
 		        self.$rect.h
 		    }
 		    /// Sets the X position of the struct. 
 		    /// Only works if the struct is mutable
-		    fn set_x(&mut self, x: i16) {
+		    fn set_x(&mut self, x: isize) {
 		        self.$rect.x = x;
 		    }
 		    /// Sets the Y position of the struct. 
 		    /// Only works if the struct is mutable
-		    fn set_y(&mut self, y: i16) {
+		    fn set_y(&mut self, y: isize) {
 		        self.$rect.y = y;
 		    }
 		}

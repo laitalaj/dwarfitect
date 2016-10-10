@@ -24,10 +24,10 @@ impl Layout {
         Layout { rooms: rooms }
     }
     fn calculate_bounding_box(&self) -> Rect {
-        let mut min_x = i16::max_value();
-        let mut min_y = i16::max_value();
-        let mut max_x = i16::min_value();
-        let mut max_y = i16::min_value();
+        let mut min_x = isize::max_value();
+        let mut min_y = isize::max_value();
+        let mut max_x = isize::min_value();
+        let mut max_y = isize::min_value();
         for i in 0..self.rooms.len() {
             let top_left = self.rooms[i].top_left();
             let bottom_right = self.rooms[i].bottom_right();

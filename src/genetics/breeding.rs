@@ -71,7 +71,7 @@ pub fn search_candidate<'a>(candidates: &'a Vec<Candidate>, random_value: f32)
 }
 
 /// Generates an initial population with determined size
-pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: u16,
+pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: usize,
   rng: &mut R) -> Vec<Chromosome> {
     let mut population: Vec<Chromosome> = Vec::new();
     for _ in 0..size {
