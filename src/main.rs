@@ -16,24 +16,25 @@ fn main() { //TODO: Move all this to actual functions
 	}
 	let mut rng = rand::thread_rng();
 	let mut population = breeding::generate_initial_population(
-		genes, 500, &mut rng);
+		genes, 300, &mut rng);
 	let mut last_fitness: f32 = 0.0;
-	for i in 0..5001 {
+	for i in 0..4001 {
 		population = breeding::breed(population, &mut rng);
-		if i % 500 == 0 {
+		if i % 200 == 0 {
 			population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
 			population.reverse();
 			println!("{:?}: {:?}", i, population[0]);
-//			if population[0].fitness > last_fitness {
-//				last_fitness = population[0].fitness;
-//			} else {
-//				println!("PURGE!");
-//				breeding::purge(&mut population, &mut rng);
-//			}
+			if population[0].fitness > last_fitness {
+				last_fitness = population[0].fitness;
+			} else {
+				println!("PURGE!");
+				breeding::purge(&mut population, &mut rng);
+			}
 		}
 	}
 	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
 	population.reverse();
+	println!("{:?}: {:?}", population[0], population[0].genes[0]);
 	let layout = population[0].as_layout();
 	let matrix = layout.as_char_matrix();
 	match output::save(matrix) {

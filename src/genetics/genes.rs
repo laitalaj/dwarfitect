@@ -133,7 +133,7 @@ impl PartialOrd for Chromosome {
 impl Debug for Chromosome {
 	/// Debug output formatting for chromosome
 	fn fmt(&self, f: &mut Formatter) -> Result {
-		write!(f, "Chromosome with fitness {}, bounding box area {}, 
+		write!(f, "Chromosome with fitness {}, bounding box area {}, \
 		total area {}", self.fitness, self.bounding_box.area(), self.total_area)
 	}
 }
@@ -164,7 +164,7 @@ impl Chromosome {
     /// Generates a more randomized (and perhaps more valid) initial chromosome
     /// from given genes.
     pub fn generate_initial<R: Rng>(genes: Vec<Gene>, rng: &mut R) -> Chromosome {
-        let mut shuffled_genes = genes.to_vec();
+        let mut shuffled_genes = genes[1..].to_vec();
         rng.shuffle(&mut shuffled_genes);
         shuffled_genes[0].set_x(0);
         shuffled_genes[0].set_y(0);
@@ -197,6 +197,7 @@ impl Chromosome {
             }
         }
         shuffled_genes.sort();
+        shuffled_genes.insert(0, genes[0].set_pos(0, 0));
         Chromosome::new(shuffled_genes)
     }
     /// Relaxes the chromosome: moves every gene so that no two genes collide.
@@ -205,6 +206,18 @@ impl Chromosome {
         self.genes.sort_by(|a, b| a.rect_cmp(b));
         for i in 0..self.genes.len() {
             for j in i + 1..self.genes.len() {
+            	if self.genes[j].gene_id == 0 { //TODO: Refactor!
+            		let bottom_right1 = self.genes[j].bottom_right();
+                    let top_left2 = self.genes[i].top_left();
+                    let diff = top_left2.diff(bottom_right1);
+                    if diff.x.abs() < diff.y.abs() {
+                        let new_x = self.genes[i].get_x() + diff.x.abs();
+                        self.genes[i].set_x(new_x);
+                    } else {
+                        let new_y = self.genes[i].get_y() + diff.y.abs();
+                        self.genes[i].set_y(new_y);
+                    }
+            	}
                 if self.genes[i].collides_with(self.genes[j]) {
                     let bottom_right1 = self.genes[i].bottom_right();
                     let top_left2 = self.genes[j].top_left();
@@ -302,7 +315,7 @@ impl Chromosome {
         if !self.bounding_box_fresh {
             self.calculate_bounding_box();
         }
-        for i in 0..self.genes.len() {
+        for i in 1..self.genes.len() {
             if rng.next_f32() < MUTATION_CHANCE {
                 self.genes[i].mutate(self.bounding_box, rng);
             }
