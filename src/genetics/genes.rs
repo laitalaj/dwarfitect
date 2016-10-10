@@ -42,6 +42,9 @@ pub struct Chromosome {
     bounding_box_fresh: bool,
 }
 
+// Implement methods that manipulate the rectangle inside the gene
+impl_rect_methods!(Gene, rect);
+
 impl PartialOrd for Gene {
     /// Gives an ordering the genes by gene ID
     /// Uses Ord-trait's cmp() to do the comparison
@@ -88,10 +91,6 @@ impl Gene {
             None => panic!("For some reason the mutation list was empty!"),
         };
     }
-    /// Gives an ordering according to the genes Rects ordering
-    fn rect_cmp(&self, other: &Gene) -> Ordering {
-        self.rect.cmp(&other.rect)
-    }
     /// Rotates the gene (switches it's rectangles width with its height)
     /// Returns a new, rotated gene
     fn rotate(&self) -> Gene {
@@ -100,44 +99,6 @@ impl Gene {
             rect: new_rect,
             gene_id: self.gene_id,
         }
-    }
-    /// Rotates the gene in place (switches it's rectangles width with its
-    /// height). Only works for mutable genes.
-    fn rot_in_place(&mut self) {
-        self.rect = self.rect.rotate();
-    }
-    /// Checks if this gene collides with another gene. Uses Rect's
-    /// collides_with for this
-    fn collides_with(&self, gene: Gene) -> bool {
-        self.rect.collides_with(gene.rect)
-    }
-    /// Gives the area of this gene's rect
-    fn area(&self) -> i16 {
-        self.rect.area()
-    }
-    /// Gets the center point (x+w/2, y+h/2) of this gene's rect
-    fn center(&self) -> Point {
-        self.rect.center()
-    }
-    /// Gets the top left corner (x, y) of this gene's rect
-    fn top_left(&self) -> Point {
-        self.rect.top_left()
-    }
-    /// Gets the bottom right corner (x+w, y+h) of this gene's rect
-    fn bottom_right(&self) -> Point {
-        self.rect.bottom_right()
-    }
-    fn get_x(&self) -> i16 {
-        self.rect.x
-    }
-    fn get_y(&self) -> i16 {
-        self.rect.y
-    }
-    fn get_w(&self) -> i16 {
-        self.rect.w
-    }
-    fn get_h(&self) -> i16 {
-        self.rect.h
     }
     /// Creates a new gene that's a copy of this one but with a differing
     /// position.
@@ -152,14 +113,6 @@ impl Gene {
             rect: new_rect,
             gene_id: self.gene_id,
         }
-    }
-    /// Sets the X position of the gene. Only works if the gene is mutable
-    fn set_x(&mut self, x: i16) {
-        self.rect.x = x;
-    }
-    /// Sets the Y position of the gene. Only works if the gene is mutable
-    fn set_y(&mut self, y: i16) {
-        self.rect.y = y;
     }
     /// Converts the gene into a room (shrinks it down a bit)
     pub fn as_room(&self) -> Room {

@@ -80,6 +80,67 @@ impl Rect {
     }
 }
 
+/// Implement methods that interact with an enclosed Rect in a struct
+#[macro_export]
+macro_rules! impl_rect_methods {
+	($Struct:ty, $rect:ident) => {
+		impl $Struct {
+			/// Gives an ordering according to the rect's ordering
+		    fn rect_cmp(&self, other: &$Struct) -> Ordering {
+		        self.$rect.cmp(&other.$rect)
+		    }
+		    /// Rotates the struct's rect in place (switches it's rectangles
+		    /// width with its height). Only works if mutable.
+		    fn rot_in_place(&mut self) {
+		        self.$rect = self.$rect.rotate();
+		    }
+		    /// Checks if this struct collides with another struct. Uses Rect's
+		    /// collides_with for this
+		    fn collides_with(&self, other: $Struct) -> bool {
+		        self.$rect.collides_with(other.$rect)
+		    }
+		    /// Gives the area of this structs's rect
+		    fn area(&self) -> i16 {
+		        self.$rect.area()
+		    }
+		    /// Gets the center point (x+w/2, y+h/2) of this structs's rect
+		    fn center(&self) -> Point {
+		        self.$rect.center()
+		    }
+		    /// Gets the top left corner (x, y) of this structs's rect
+		    fn top_left(&self) -> Point {
+		        self.$rect.top_left()
+		    }
+		    /// Gets the bottom right corner (x+w, y+h) of this structs's rect
+		    fn bottom_right(&self) -> Point {
+		        self.$rect.bottom_right()
+		    }
+		    fn get_x(&self) -> i16 {
+		        self.$rect.x
+		    }
+		    fn get_y(&self) -> i16 {
+		        self.$rect.y
+		    }
+		    fn get_w(&self) -> i16 {
+		        self.$rect.w
+		    }
+		    fn get_h(&self) -> i16 {
+		        self.$rect.h
+		    }
+		    /// Sets the X position of the struct. 
+		    /// Only works if the struct is mutable
+		    fn set_x(&mut self, x: i16) {
+		        self.$rect.x = x;
+		    }
+		    /// Sets the Y position of the struct. 
+		    /// Only works if the struct is mutable
+		    fn set_y(&mut self, y: i16) {
+		        self.$rect.y = y;
+		    }
+		}
+	}
+}
+
 #[cfg(test)]
 mod tests {
 

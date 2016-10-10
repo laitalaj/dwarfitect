@@ -1,4 +1,5 @@
 use mapping::shapes::{Rect, Point};
+use std::cmp::Ordering;
 use collections::Matrix;
 
 pub struct Room {
@@ -9,21 +10,12 @@ pub struct Layout {
     rooms: Vec<Room>,
 }
 
+// Implement methods that manipulate the rectangle inside the room
+impl_rect_methods!(Room, rect);
+
 impl Room {
     pub fn new(rect: Rect) -> Self {
         Room { rect: rect }
-    }
-    pub fn top_left(&self) -> Point {
-        self.rect.top_left()
-    }
-    pub fn bottom_right(&self) -> Point {
-        self.rect.bottom_right()
-    }
-    pub fn get_w(&self) -> i16 {
-        self.rect.w
-    }
-    pub fn get_h(&self) -> i16 {
-        self.rect.h
     }
 }
 
