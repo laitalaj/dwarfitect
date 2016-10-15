@@ -113,7 +113,7 @@ macro_rules! impl_rect_methods {
 	($Struct:ty, $rect:ident) => {
 		impl $Struct {
 			/// Gives an ordering according to the rect's ordering
-		    fn rect_cmp(&self, other: &$Struct) -> Ordering {
+		    pub fn rect_cmp(&self, other: &$Struct) -> Ordering {
 		        self.$rect.cmp(&other.$rect)
 		    }
 		    /// Gives an ordering based on distance from origo
@@ -122,54 +122,54 @@ macro_rules! impl_rect_methods {
 		    }
 		    /// Rotates the struct's rect in place (switches it's rectangles
 		    /// width with its height). Only works if mutable.
-		    fn rot_in_place(&mut self) {
+		    pub fn rot_in_place(&mut self) {
 		        self.$rect = self.$rect.rotate();
 		    }
 		    /// Checks if this struct collides with another struct. Uses Rect's
 		    /// collides_with for this
-		    fn collides_with(&self, other: $Struct) -> bool {
+		    pub fn collides_with(&self, other: $Struct) -> bool {
 		        self.$rect.collides_with(other.$rect)
 		    }
 		    /// Gives the area of this structs's rect
-		    fn area(&self) -> isize {
+		    pub fn area(&self) -> isize {
 		        self.$rect.area()
 		    }
 		    /// Gets the center point (x+w/2, y+h/2) of this structs's rect
-		    fn center(&self) -> Point {
+		    pub fn center(&self) -> Point {
 		        self.$rect.center()
 		    }
 		    /// Gets the top left corner (x, y) of this structs's rect
-		    fn top_left(&self) -> Point {
+		    pub fn top_left(&self) -> Point {
 		        self.$rect.top_left()
 		    }
 		    /// Gets the bottom right corner (x+w, y+h) of this structs's rect
-		    fn bottom_right(&self) -> Point {
+		    pub fn bottom_right(&self) -> Point {
 		        self.$rect.bottom_right()
 		    }
-		    fn get_x(&self) -> isize {
+		    pub fn get_x(&self) -> isize {
 		        self.$rect.x
 		    }
-		    fn get_y(&self) -> isize {
+		    pub fn get_y(&self) -> isize {
 		        self.$rect.y
 		    }
-		    fn get_w(&self) -> isize {
+		    pub fn get_w(&self) -> isize {
 		        self.$rect.w
 		    }
-		    fn get_h(&self) -> isize {
+		    pub fn get_h(&self) -> isize {
 		        self.$rect.h
 		    }
 		    /// Sets the X position of the struct. 
 		    /// Only works if the struct is mutable
-		    fn set_x(&mut self, x: isize) {
+		    pub fn set_x(&mut self, x: isize) {
 		        self.$rect.x = x;
 		    }
 		    /// Sets the Y position of the struct. 
 		    /// Only works if the struct is mutable
-		    fn set_y(&mut self, y: isize) {
+		    pub fn set_y(&mut self, y: isize) {
 		        self.$rect.y = y;
 		    }
 		    /// Sets the center of the struct.
-		    fn set_center(&mut self, x: isize, y: isize) {
+		    pub fn set_center(&mut self, x: isize, y: isize) {
 		    	self.$rect.set_center(x, y);
 		    }
 		}

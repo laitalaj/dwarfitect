@@ -6,7 +6,7 @@ use super::genes::{Gene, Chromosome};
 
 /// Percentage of population that should be kept alive for the next round of
 /// breeding
-pub const KEEP_ALIVE_PERCENTAGE: f32 = 0.15;
+pub const KEEP_ALIVE_PERCENTAGE: f32 = 0.1;
 /// Percentage of population to kill when purging a population
 pub const PURGE_PERCENTAGE: f32 = 0.7;
 

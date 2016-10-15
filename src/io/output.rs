@@ -3,7 +3,7 @@ use std::fs::File;
 use collections::Matrix;
 
 /// Saves a character matrix to a file
-pub fn save(matrix: Matrix<char>) -> Result<(), Error>{
+pub fn save(matrix: Matrix<char>, filename: String) -> Result<(), Error>{
 	let mut output = String::new();
 	for y in 0..matrix.h {
 		for x in 0..matrix.w {
@@ -16,7 +16,7 @@ pub fn save(matrix: Matrix<char>) -> Result<(), Error>{
 		output.push('\r'); // DOS-compatible line change
 		output.push('\n');
 	}
-	let mut file = try!(File::create("out.txt")); //TODO: Filenames
+	let mut file = try!(File::create(filename)); //TODO: Filenames
 	try!(file.write_all(output.as_bytes()));
 	Ok(())
 }

@@ -14,7 +14,7 @@ use self::Mutation::{RotationMutation, PositionMutation};
 /// The chance that, during mating, two genes will be switched
 pub const CROSSOVER_CHANCE: f32 = 0.5;
 /// The chance that, during mutation, a gene will mutate
-pub const MUTATION_CHANCE: f32 = 0.025;
+pub const MUTATION_CHANCE: f32 = 0.04;
 /// A list of all possible mutation types
 pub const MUTATIONS: [Mutation; 2] = [RotationMutation, PositionMutation];
 
@@ -165,6 +165,7 @@ impl Chromosome {
     /// from given genes.
     pub fn generate_initial<R: Rng>(genes: Vec<Gene>, rng: &mut R) -> Chromosome {
         let mut shuffled_genes = genes.to_vec();
+        shuffled_genes[0].set_center(0, 0);
         rng.shuffle(&mut shuffled_genes[1..]);
 //        shuffled_genes[0].set_x(0);
 //        shuffled_genes[0].set_y(0);
@@ -183,17 +184,39 @@ impl Chromosome {
                 // 50% chance to rotate
                 shuffled_genes[i].rot_in_place();
             }
+            let x_variance = shuffled_genes[i].get_w() / 2;
+            let y_variance = shuffled_genes[i].get_h() / 2;
+            let x_var_range = Range::new(-x_variance, x_variance);
+            let y_var_range = Range::new(-y_variance, y_variance);
             match place.2 { //TODO: Split this to different functions
                 Left => {
                     x -= shuffled_genes[i].get_w();
+                    y += y_var_range.ind_sample(rng);
                     places_to_go.push((x, y, Left));
-                }
+                    places_to_go.push((x, y, Up));
+                    places_to_go.push((x, y + shuffled_genes[i].get_h(), Down));
+                },
                 Up => {
+                	x += x_var_range.ind_sample(rng);
                     y -= shuffled_genes[i].get_h();
                     places_to_go.push((x, y, Up));
+                    places_to_go.push((x, y, Left));
+                    places_to_go.push((x + shuffled_genes[i].get_w(), y, Right));
+                },
+                Right => {
+                	//x += shuffled_genes[i].get_w();
+                	y += y_var_range.ind_sample(rng);
+                	places_to_go.push((x + shuffled_genes[i].get_w(), y, Right));
+                	places_to_go.push((x, y + shuffled_genes[i].get_h(), Down));
+                	places_to_go.push((x, y, Up));
+                },
+                Down => {
+                	x += x_var_range.ind_sample(rng);
+                	//y += shuffled_genes[i].get_h();
+                	places_to_go.push((x, y + shuffled_genes[i].get_h(), Down));
+                	places_to_go.push((x + shuffled_genes[i].get_w(), y, Right));
+                	places_to_go.push((x, y, Left));
                 }
-                Right => places_to_go.push((x + shuffled_genes[i].get_w(), y, Right)),
-                Down => places_to_go.push((x, y + shuffled_genes[i].get_h(), Down)),
             }
             shuffled_genes[i].set_x(x);
             shuffled_genes[i].set_y(y);

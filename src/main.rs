@@ -17,6 +17,16 @@ fn main() { //TODO: Move all this to actual functions
 	let mut rng = rand::thread_rng();
 	let mut population = breeding::generate_initial_population(
 		genes, 500, &mut rng);
+	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
+	population.reverse();
+	println!("{:?}: {:?}", population[0], population[0].genes[0]);
+	println!("{:?}", population[0].genes[0].center());
+	let layout = population[0].as_layout();
+	let matrix = layout.as_char_matrix();
+	match output::save(matrix, String::from("initial.txt")) {
+		Err(reason) => panic!("{:?}", reason),
+		Ok(_) => {}
+	};
 	let mut last_fitness: f32 = 0.0;
 	let mut counter = 0;
 	for i in 0..3001 {
@@ -31,7 +41,7 @@ fn main() { //TODO: Move all this to actual functions
 			} else {
 				println!("PURGE!");
 				counter += 1;
-				if counter == 4 {
+				if counter == 7 {
 					break;
 				}
 				breeding::purge(&mut population, &mut rng);
@@ -41,9 +51,10 @@ fn main() { //TODO: Move all this to actual functions
 	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
 	population.reverse();
 	println!("{:?}: {:?}", population[0], population[0].genes[0]);
+	println!("{:?}", population[0].genes[0].center());
 	let layout = population[0].as_layout();
 	let matrix = layout.as_char_matrix();
-	match output::save(matrix) {
+	match output::save(matrix, String::from("final.txt")) {
 		Err(reason) => panic!("{:?}", reason),
 		Ok(_) => {}
 	};
