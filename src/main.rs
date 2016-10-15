@@ -18,6 +18,7 @@ fn main() { //TODO: Move all this to actual functions
 	let mut population = breeding::generate_initial_population(
 		genes, 500, &mut rng);
 	let mut last_fitness: f32 = 0.0;
+	let mut counter = 0;
 	for i in 0..3001 {
 		population = breeding::breed(population, &mut rng);
 		if i % 200 == 0 {
@@ -26,8 +27,13 @@ fn main() { //TODO: Move all this to actual functions
 			println!("{:?}: {:?}", i, population[0]);
 			if population[0].fitness > last_fitness {
 				last_fitness = population[0].fitness;
+				counter = 0;
 			} else {
 				println!("PURGE!");
+				counter += 1;
+				if counter == 4 {
+					break;
+				}
 				breeding::purge(&mut population, &mut rng);
 			}
 		}

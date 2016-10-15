@@ -14,7 +14,7 @@ use self::Mutation::{RotationMutation, PositionMutation};
 /// The chance that, during mating, two genes will be switched
 pub const CROSSOVER_CHANCE: f32 = 0.5;
 /// The chance that, during mutation, a gene will mutate
-pub const MUTATION_CHANCE: f32 = 0.01;
+pub const MUTATION_CHANCE: f32 = 0.025;
 /// A list of all possible mutation types
 pub const MUTATIONS: [Mutation; 2] = [RotationMutation, PositionMutation];
 
@@ -164,40 +164,42 @@ impl Chromosome {
     /// Generates a more randomized (and perhaps more valid) initial chromosome
     /// from given genes.
     pub fn generate_initial<R: Rng>(genes: Vec<Gene>, rng: &mut R) -> Chromosome {
-        let mut shuffled_genes = genes[1..].to_vec();
-        rng.shuffle(&mut shuffled_genes);
-        shuffled_genes[0].set_x(0);
-        shuffled_genes[0].set_y(0);
+        let mut shuffled_genes = genes.to_vec();
+        rng.shuffle(&mut shuffled_genes[1..]);
+//        shuffled_genes[0].set_x(0);
+//        shuffled_genes[0].set_y(0);
         let mut places_to_go: Vec<(isize, isize, Direction)> = Vec::new();
-        places_to_go.push((0, 0, Left));
-        places_to_go.push((0, 0, Up));
-        places_to_go.push((shuffled_genes[0].get_x(), 0, Right));
-        places_to_go.push((0, shuffled_genes[0].get_y(), Down));
+        let top_left_0 = shuffled_genes[0].top_left();
+        let bottom_right_0 = shuffled_genes[0].bottom_right();
+        places_to_go.push((top_left_0.x, top_left_0.y, Left));
+        places_to_go.push((top_left_0.x, top_left_0.y, Up));
+        places_to_go.push((bottom_right_0.x, top_left_0.y, Right));
+        places_to_go.push((top_left_0.x, bottom_right_0.y, Down));
         for i in 1..shuffled_genes.len() {
             let place = places_to_go.remove(0); //TODO: Create an efficient queue
             let mut x = place.0;
             let mut y = place.1;
-            match place.2 { //TODO: Split this to different functions
-                Left => {
-                    x -= shuffled_genes[i].get_x();
-                    places_to_go.push((x, y, Left));
-                }
-                Up => {
-                    y -= shuffled_genes[i].get_y();
-                    places_to_go.push((x, y, Up));
-                }
-                Right => places_to_go.push((x + shuffled_genes[i].get_x(), y, Right)),
-                Down => places_to_go.push((x, y + shuffled_genes[i].get_y(), Down)),
-            }
-            shuffled_genes[i].set_x(x);
-            shuffled_genes[i].set_y(y);
             if rng.next_f32() > 0.5 {
                 // 50% chance to rotate
                 shuffled_genes[i].rot_in_place();
             }
+            match place.2 { //TODO: Split this to different functions
+                Left => {
+                    x -= shuffled_genes[i].get_w();
+                    places_to_go.push((x, y, Left));
+                }
+                Up => {
+                    y -= shuffled_genes[i].get_h();
+                    places_to_go.push((x, y, Up));
+                }
+                Right => places_to_go.push((x + shuffled_genes[i].get_w(), y, Right)),
+                Down => places_to_go.push((x, y + shuffled_genes[i].get_h(), Down)),
+            }
+            shuffled_genes[i].set_x(x);
+            shuffled_genes[i].set_y(y);
         }
         shuffled_genes.sort();
-        shuffled_genes.insert(0, genes[0].set_pos(0, 0));
+//        shuffled_genes.insert(0, genes[0].set_pos(0, 0));
         Chromosome::new(shuffled_genes)
     }
     /// Relaxes the chromosome: moves every gene so that no two genes collide.
