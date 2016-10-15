@@ -97,6 +97,13 @@ macro_rules! impl_rect_methods {
 		    fn rect_cmp(&self, other: &$Struct) -> Ordering {
 		        self.$rect.cmp(&other.$rect)
 		    }
+		    /// Gives an ordering based on distance from origo
+		    pub fn origo_cmp(&self, other: &$Struct) -> Ordering {
+		    	let origo = Point::new(0, 0);
+		    	let my_dist = origo.dist(self.center());
+		    	let other_dist = origo.dist(other.center());
+		    	my_dist.partial_cmp(&other_dist).unwrap_or(Ordering::Equal)
+		    }
 		    /// Rotates the struct's rect in place (switches it's rectangles
 		    /// width with its height). Only works if mutable.
 		    fn rot_in_place(&mut self) {

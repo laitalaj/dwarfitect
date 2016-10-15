@@ -121,13 +121,6 @@ impl Gene {
     	new_rect.h -= 1;
     	Room::new(new_rect)
     }
-    /// Gives an ordering based on distance from origo
-    pub fn origo_cmp(&self, other: &Gene) -> Ordering {
-    	let origo = Point::new(0, 0);
-    	let my_dist = origo.dist(self.center());
-    	let other_dist = origo.dist(other.center());
-    	my_dist.partial_cmp(&other_dist).unwrap_or(Ordering::Equal)
-    }
 }
 
 impl PartialOrd for Chromosome {
@@ -210,13 +203,30 @@ impl Chromosome {
     /// Relaxes the chromosome: moves every gene so that no two genes collide.
     /// Recalculates fitness when done.
     fn relax(&mut self) {
-        self.genes.sort_by(|a, b| a.origo_cmp(b));
-        for i in 0..self.genes.len() {
-            for j in i + 1..self.genes.len() {
-            	if self.genes[j].gene_id == 0 { //TODO: Refactor!
-            		let bottom_right1 = self.genes[j].bottom_right();
-                    let top_left2 = self.genes[i].top_left();
-                    let diff = top_left2.diff(bottom_right1);
+    	//Leave gene 0 as first gene
+        self.genes[1..].sort_by(|a, b| a.origo_cmp(b));
+        for i in 1..self.genes.len() {
+        	let mut j = 0;
+        	let center_i = self.genes[i].center();
+        	let top_left_i = self.genes[i].top_left();
+        	let bottom_right_i = self.genes[i].bottom_right();
+        	let x_dir = sign(center_i.x);
+        	let y_dir = sign(center_i.y);
+            while j < i {
+                if self.genes[i].collides_with(self.genes[j]) {
+                    let top_left_j = self.genes[j].top_left();
+                    let bottom_right_j = self.genes[j].bottom_right();
+                    let mut diff = Point::new(0, 0);
+                    if x_dir < 0 {
+                    	diff.x = top_left_j.x - bottom_right_i.x;
+                    } else {
+                    	diff.x = bottom_right_j.x - top_left_i.x;
+                    }
+                    if y_dir < 0 {
+                    	diff.y = top_left_j.y - bottom_right_i.y;
+                    } else {
+                    	diff.y = bottom_right_j.y - top_left_i.y;
+                    }
                     if diff.x.abs() < diff.y.abs() {
                         let new_x = self.genes[i].get_x() + diff.x;
                         self.genes[i].set_x(new_x);
@@ -224,18 +234,9 @@ impl Chromosome {
                         let new_y = self.genes[i].get_y() + diff.y;
                         self.genes[i].set_y(new_y);
                     }
-            	}
-                if self.genes[i].collides_with(self.genes[j]) {
-                    let bottom_right1 = self.genes[i].bottom_right();
-                    let top_left2 = self.genes[j].top_left();
-                    let diff = top_left2.diff(bottom_right1);
-                    if diff.x.abs() < diff.y.abs() {
-                        let new_x = self.genes[j].get_x() + diff.x;
-                        self.genes[j].set_x(new_x);
-                    } else {
-                        let new_y = self.genes[j].get_y() + diff.y;
-                        self.genes[j].set_y(new_y);
-                    }
+                    j = 0;
+                } else {
+	                j += 1;
                 }
             }
         }
@@ -338,6 +339,14 @@ impl Chromosome {
     	}
     	Layout::new(rooms)
     }
+}
+
+fn sign(n: isize) -> isize {
+	if n < 0 {
+		-1
+	} else {
+		1
+	}
 }
 
 
