@@ -1,4 +1,5 @@
 //! Module for all kinds of geometry
+use std::cmp::Ordering;
 
 /// Direction enums
 #[derive(Copy, Clone)]
@@ -89,6 +90,21 @@ impl Rect {
             y: self.y + self.h,
         }
     }
+    /// Sets the center of the rect to given value
+    pub fn set_center(&mut self, x: isize, y: isize) {
+    	let current_center = self.center();
+    	let desired_center = Point::new(x, y);
+    	let move_vector = current_center.diff(desired_center);
+    	self.x += move_vector.x;
+    	self.y += move_vector.y;
+    } 
+    /// Compare based on distance from origo
+    pub fn origo_cmp(&self, other: &Rect) -> Ordering {
+    	let origo = Point::new(0, 0);
+    	let my_dist = origo.dist(self.center());
+    	let other_dist = origo.dist(other.center());
+    	my_dist.partial_cmp(&other_dist).unwrap_or(Ordering::Equal)
+    }
 }
 
 /// Implement methods that interact with an enclosed Rect in a struct
@@ -102,10 +118,7 @@ macro_rules! impl_rect_methods {
 		    }
 		    /// Gives an ordering based on distance from origo
 		    pub fn origo_cmp(&self, other: &$Struct) -> Ordering {
-		    	let origo = Point::new(0, 0);
-		    	let my_dist = origo.dist(self.center());
-		    	let other_dist = origo.dist(other.center());
-		    	my_dist.partial_cmp(&other_dist).unwrap_or(Ordering::Equal)
+		    	self.$rect.origo_cmp(&other.$rect)
 		    }
 		    /// Rotates the struct's rect in place (switches it's rectangles
 		    /// width with its height). Only works if mutable.
@@ -154,6 +167,10 @@ macro_rules! impl_rect_methods {
 		    /// Only works if the struct is mutable
 		    fn set_y(&mut self, y: isize) {
 		        self.$rect.y = y;
+		    }
+		    /// Sets the center of the struct.
+		    fn set_center(&mut self, x: isize, y: isize) {
+		    	self.$rect.set_center(x, y);
 		    }
 		}
 	}
