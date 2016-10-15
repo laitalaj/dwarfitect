@@ -612,7 +612,13 @@ mod tests {
             rect: rect4,
             gene_id: 3,
         };
-        let mut genes = Chromosome::new(vec![gene1, gene2, gene3, gene4]);
+        let mut genes = Chromosome {
+		    genes: vec![gene1, gene2, gene3, gene4],
+		    total_area: gene1.area() + gene2.area() + gene3.area() + gene4.area(),
+		    fitness: 0.0,
+		    bounding_box: Rect::new(0, 0, 0, 0),
+		    bounding_box_fresh: false,
+		};
         genes.calculate_bounding_box();
         assert_eq!(Rect {
                        x: -2,

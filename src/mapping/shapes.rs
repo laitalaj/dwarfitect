@@ -46,6 +46,9 @@ impl Point {
 }
 
 impl Rect {
+	pub fn new(x: isize, y: isize, w: isize, h: isize) -> Rect {
+		Rect{ x: x, y: y, w: w, h: h}
+	}
     /// "Rotates" the rectangle: returns a new rectangle with switched width and
     /// height.
     pub fn rotate(&self) -> Rect {
