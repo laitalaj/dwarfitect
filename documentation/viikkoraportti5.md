@@ -35,3 +35,5 @@ Aikaa käytetty 1,5h
 Viimeistelin relaxin uudelleenkirjoituksen, ja sen jälkeen outputteja katsellessani huomasin,
 että alkupopulaatio-kromosomien luonti toimii aivan väärin. Korjasin tämän toimimaan siten, miten
 olin ajatellut, ja lisäsin vähän satunnaisuutta sekoitukseen.
+
+Aikaa käytetty 1h
