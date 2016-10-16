@@ -1,13 +1,13 @@
 use mapping::shapes::{Rect, Point};
 use std::cmp::Ordering;
-use collections::Matrix;
+use collections::{Matrix, Vector};
 
 pub struct Room {
     rect: Rect,
 }
 
 pub struct Layout {
-    rooms: Vec<Room>,
+    rooms: Vector<Room>,
 }
 
 // Implement methods that manipulate the rectangle inside the room
@@ -20,7 +20,7 @@ impl Room {
 }
 
 impl Layout {
-    pub fn new(rooms: Vec<Room>) -> Self {
+    pub fn new(rooms: Vector<Room>) -> Self {
         Layout { rooms: rooms }
     }
     fn calculate_bounding_box(&self) -> Rect {

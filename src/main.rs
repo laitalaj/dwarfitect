@@ -5,11 +5,12 @@ use std::cmp::Ordering::Equal;
 use dwarfilib::mapping::shapes::Rect;
 use dwarfilib::genetics::genes::Gene;
 use dwarfilib::genetics::breeding;
+use dwarfilib::collections::Vector;
 use dwarfilib::io::output;
 
 /// A makeshift main-function, used to test functionality.
 fn main() { //TODO: Move all this to actual functions
-	let mut genes: Vec<Gene> = Vec::new();
+	let mut genes: Vector<Gene> = Vector::new();
 	for i in 1..17 {
 		let rect = Rect{ x: 0, y: 0, w: (i*13)%7 + 4, h: (i*5)%7 + 4};
 		genes.push(Gene::new(rect, i - 1));

@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
 use std::fmt::{Debug, Formatter, Result};
 use super::genes::{Gene, Chromosome};
+use collections::Vector;
 
 /// Percentage of population that should be kept alive for the next round of
 /// breeding
@@ -44,7 +45,7 @@ impl<'a> PartialOrd for Candidate<'a> {
 
 /// Binary searches the candidate with the smallest probability range end that's
 /// larger than random_value
-pub fn search_candidate<'a>(candidates: &'a Vec<Candidate>, random_value: f32)
+pub fn search_candidate<'a>(candidates: &'a Vector<Candidate>, random_value: f32)
 -> Option<&'a Candidate<'a>> {
     let mut smallest_match: Option<&Candidate> = None;
     let mut min = 0;
@@ -62,28 +63,28 @@ pub fn search_candidate<'a>(candidates: &'a Vec<Candidate>, random_value: f32)
             };
         }
     }
-    if smallest_match == None {
-      println!("{}", random_value);
-      println!("{}, {}", min, max);
-      println!("{:?}", candidates);
-    }
+//    if smallest_match == None {
+//      println!("{}", random_value);
+//      println!("{}, {}", min, max);
+//      println!("{:?}", candidates);
+//    }
     smallest_match
 }
 
 /// Generates an initial population with determined size
-pub fn generate_initial_population<R: Rng>(genes: Vec<Gene>, size: usize,
-  rng: &mut R) -> Vec<Chromosome> {
-    let mut population: Vec<Chromosome> = Vec::new();
+pub fn generate_initial_population<R: Rng>(genes: Vector<Gene>, size: usize,
+  rng: &mut R) -> Vector<Chromosome> {
+    let mut population: Vector<Chromosome> = Vector::new();
     for _ in 0..size {
-        population.push(Chromosome::generate_initial(genes.to_vec(), rng));
+        population.push(Chromosome::generate_initial(genes.clone(), rng));
     }
     population
 }
 
 /// Breeds a population by 1 step; generates and mutates children and returns
 /// the next population.
-pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
--> Vec<Chromosome> {
+pub fn breed<R: Rng>(population: Vector<Chromosome>, rng: &mut R)
+-> Vector<Chromosome> {
     let mut total_fitness = 0.0;
     let mut work_population = population.to_vec();
     work_population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
@@ -91,7 +92,7 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
     for i in 0..work_population.len() {
         total_fitness += work_population[i].fitness;
     }
-    let mut candidates: Vec<Candidate> = Vec::new();
+    let mut candidates: Vector<Candidate> = Vector::new();
     let mut current_prob_range_end = 0.0;
     for i in 0..work_population.len() {
         if i == work_population.len() - 1 { // Make sure float inaccuracy doesn't destroy things
@@ -102,7 +103,7 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
         candidates
         .push(Candidate::new(current_prob_range_end, &work_population[i]));
     }
-    let mut next_population: Vec<Chromosome> = Vec::new(); //TODO: Keeping the best of previous population
+    let mut next_population: Vector<Chromosome> = Vector::new(); //TODO: Keeping the best of previous population
     let keep_alive = work_population.len() as f32 * KEEP_ALIVE_PERCENTAGE;
     let keep_alive_usize = keep_alive.round() as usize;
     for i in 0..keep_alive_usize {
@@ -130,14 +131,14 @@ pub fn breed<R: Rng>(population: Vec<Chromosome>, rng: &mut R)
 
 /// Replaces number of worst chromosomes equal to PURGE_PERCENTAGE with initial
 /// chromosomes. Doesn't work too well as of now...
-pub fn purge<R: Rng>(population: &mut Vec<Chromosome>, rng: &mut R) {
+pub fn purge<R: Rng>(population: &mut Vector<Chromosome>, rng: &mut R) {
   population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
     population.reverse(); //TODO: Get rid of excess sorts
   let kill = population.len() as f32 * PURGE_PERCENTAGE;
     let kill_usize = kill.round() as usize;
-    let genes = population[0].genes.to_vec();
+    let genes = population[0].genes.clone();
     for i in kill_usize..population.len() {
-      population[i] = Chromosome::generate_initial(genes.to_vec(), rng);
+      population[i] = Chromosome::generate_initial(genes.clone(), rng);
     }
 }
 
@@ -147,6 +148,7 @@ mod tests {
     use super::*;
     use mapping::shapes::Rect;
     use genetics::genes::{Gene, Chromosome};
+    use collections::Vector;
     use rand;
 
     #[test]
@@ -180,8 +182,13 @@ mod tests {
         };
         let gene4 = Gene::new(rect4, 3);
         let mut rng = rand::thread_rng();
+        let mut genes = Vector::new();
+        genes.push(gene1);
+        genes.push(gene2);
+        genes.push(gene3);
+        genes.push(gene4);
         let initial_pop = generate_initial_population(
-          vec![gene1, gene2, gene3, gene4], 100, &mut rng
+          genes, 100, &mut rng
         );
         assert_eq!(100, initial_pop.len());
         let next_pop = breed(initial_pop, &mut rng);
@@ -191,9 +198,11 @@ mod tests {
     #[test]
     fn search_candidate_finds_correct_candidate() {
       let rect = Rect { x:0, y:0, w:2, h:2 };
-      let mut chromosome = Chromosome::new(vec![Gene::new(rect, 1)]);
-      let mut chromosomes = Vec::new();
-      let mut candidates = Vec::new();
+      let mut dummy_genes = Vector::new();
+      dummy_genes.push(Gene::new(rect, 1));
+      let mut chromosome = Chromosome::new(dummy_genes);
+      let mut chromosomes = Vector::new();
+      let mut candidates = Vector::new();
       for _ in 0..10 {
         let new_chromosome = chromosome.clone();
         chromosomes.push(new_chromosome);

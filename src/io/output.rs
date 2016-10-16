@@ -39,7 +39,7 @@ mod tests {
 				mat.set(x, y, char);
 			}
 		}
-		match save(mat) {
+		match save(mat, String::from("test.txt")) {
 			Ok(_) => {},
 			Err(reason) => panic!("{:?}", reason)
 		}

@@ -1,6 +1,5 @@
 //! Module for genetic structs
 
-use std::vec::Vec;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter, Result};
 use rand::Rng;
@@ -9,6 +8,7 @@ use mapping::shapes::{Point, Rect, Direction};
 use mapping::shapes::Direction::{Left, Right, Up, Down};
 use mapping::rooms::{Room, Layout};
 use self::Mutation::{RotationMutation, PositionMutation};
+use collections::Vector;
 
 // TODO: Get rid of this hardcoding
 /// The chance that, during mating, two genes will be switched
@@ -35,7 +35,7 @@ pub struct Gene {
 /// Chromosomes are possible solutions. They handle the genetic operations.
 #[derive(PartialEq, Clone)]
 pub struct Chromosome {
-    pub genes: Vec<Gene>, //TODO: Instead of pub, getters / setters?
+    pub genes: Vector<Gene>, //TODO: Instead of pub, getters / setters?
     total_area: isize,
     pub fitness: f32,
     bounding_box: Rect,
@@ -141,7 +141,7 @@ impl Debug for Chromosome {
 impl Chromosome {
     /// A constructor for the chromosome. Creates the chromosome and relaxes
     /// it.
-    pub fn new(genes: Vec<Gene>) -> Chromosome {
+    pub fn new(genes: Vector<Gene>) -> Chromosome {
         let mut total_area = 0;
         for i in 0..genes.len() {
             total_area += genes[i].area();
@@ -163,13 +163,14 @@ impl Chromosome {
     }
     /// Generates a more randomized (and perhaps more valid) initial chromosome
     /// from given genes.
-    pub fn generate_initial<R: Rng>(genes: Vec<Gene>, rng: &mut R) -> Chromosome {
-        let mut shuffled_genes = genes.to_vec();
+    pub fn generate_initial<R: Rng>(genes: Vector<Gene>, rng: &mut R) 
+    -> Chromosome {
+        let mut shuffled_genes = genes.clone();
         shuffled_genes[0].set_center(0, 0);
         rng.shuffle(&mut shuffled_genes[1..]);
 //        shuffled_genes[0].set_x(0);
 //        shuffled_genes[0].set_y(0);
-        let mut places_to_go: Vec<(isize, isize, Direction)> = Vec::new();
+        let mut places_to_go: Vector<(isize, isize, Direction)> = Vector::new();
         let top_left_0 = shuffled_genes[0].top_left();
         let bottom_right_0 = shuffled_genes[0].bottom_right();
         places_to_go.push((top_left_0.x, top_left_0.y, Left));
@@ -325,8 +326,8 @@ impl Chromosome {
             panic!("Tried to mate chromosomes with different lengths!
       Shame on you!");
         }
-        let mut my_childs_genes: Vec<Gene> = Vec::new();
-        let mut partners_childs_genes: Vec<Gene> = Vec::new();
+        let mut my_childs_genes: Vector<Gene> = Vector::new();
+        let mut partners_childs_genes: Vector<Gene> = Vector::new();
         for i in 0..self.genes.len() {
             if rng.next_f32() < CROSSOVER_CHANCE {
                 partners_childs_genes.push(self.genes[i]);
@@ -358,7 +359,7 @@ impl Chromosome {
     /// Converts the chromosome into a layout; converts all the genes into rooms
     /// and returns a new layout
     pub fn as_layout(&self) -> Layout {
-    	let mut rooms = Vec::new();
+    	let mut rooms = Vector::new();
     	for i in 0..self.genes.len() {
     		rooms.push(self.genes[i].as_room());
     	}
@@ -381,13 +382,14 @@ mod tests {
 
     use super::*;
     use mapping::shapes::Rect;
+    use collections::Vector;
     use rand::Rng;
 
     /// Test random number generatror - gives back numbers that were given to it
     /// one by one.
     struct TestRng {
-        numbers: Vec<f32>,
-        indexes: Vec<usize>,
+        numbers: Vector<f32>,
+        indexes: Vector<usize>,
     }
 
     impl Rng for TestRng {
@@ -505,16 +507,21 @@ mod tests {
         gene3.set_x(4);
         let mut gene4 = gene2;
         gene4.set_y(5);
-        let genes1 = vec![gene1, gene2];
-        let genes2 = vec![gene3, gene4];
+        let mut genes1 = Vector::new();
+        genes1.push(gene1);
+        genes1.push(gene2);
+        let mut genes2 = Vector::new();
+        genes2.push(gene3);
+        genes2.push(gene4);
         let chrom1 = Chromosome::new(genes1);
         let chrom2 = Chromosome::new(genes2);
         let crossover_delta = CROSSOVER_CHANCE * 0.1;
-        let random_numbers = vec![CROSSOVER_CHANCE - crossover_delta,
-                                  CROSSOVER_CHANCE + crossover_delta];
+        let mut random_numbers = Vector::new();
+        random_numbers.push(CROSSOVER_CHANCE - crossover_delta);
+        random_numbers.push(CROSSOVER_CHANCE + crossover_delta);
         let mut rng = TestRng {
             numbers: random_numbers,
-            indexes: vec![],
+            indexes: Vector::new(),
         };
         let (child1, child2) = chrom1.mate(&chrom2, &mut rng);
         assert_eq!(gene1, child1.genes[0]);
@@ -525,7 +532,7 @@ mod tests {
 
     #[test]
     fn no_intersections_after_relaxing() {
-    	let mut gene_vec = Vec::new();
+    	let mut gene_vec = Vector::new();
     	gene_vec.push(Gene::new(Rect { x: -2, y: -2, w: 5, h: 5 }, 0));
         for i in 1..100 {
         	let x = (i*13)%7 - 4;
@@ -588,7 +595,12 @@ mod tests {
             rect: rect4,
             gene_id: 3,
         };
-        let mut genes = Chromosome::new(vec![gene1, gene2, gene3, gene4]);
+        let mut gene_vec = Vector::new();
+        gene_vec.push(gene1);
+        gene_vec.push(gene2);
+        gene_vec.push(gene3);
+        gene_vec.push(gene4);
+        let mut genes = Chromosome::new(gene_vec);
         genes.relax();
         for i in 0..genes.genes.len() {
             assert_eq!(i as isize, genes.genes[i].gene_id);
@@ -637,8 +649,13 @@ mod tests {
             rect: rect4,
             gene_id: 3,
         };
+        let mut gene_vec = Vector::new();
+        gene_vec.push(gene1);
+        gene_vec.push(gene2);
+        gene_vec.push(gene3);
+        gene_vec.push(gene4);
         let mut genes = Chromosome {
-		    genes: vec![gene1, gene2, gene3, gene4],
+		    genes: gene_vec,
 		    total_area: gene1.area() + gene2.area() + gene3.area() + gene4.area(),
 		    fitness: 0.0,
 		    bounding_box: Rect::new(0, 0, 0, 0),

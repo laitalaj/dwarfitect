@@ -130,7 +130,7 @@ impl<T> Drop for ResizableMemory<T> {
 
 impl<T> Vector<T> {
     /// Creates a new vector with zero capacity
-    fn new() -> Self {
+    pub fn new() -> Self {
         Vector {
             mem: ResizableMemory::new(),
             len: 0
@@ -142,7 +142,7 @@ impl<T> Vector<T> {
     /// vectors containing ZSTs (as they take no space!)
     /// # Aborts
     /// Aborts if out of memory
-    fn new_with_size(cap: usize) -> Self {
+    pub fn new_with_size(cap: usize) -> Self {
       Vector {
         mem: ResizableMemory::new_with_size(cap),
         len: 0
@@ -172,10 +172,40 @@ impl<T> Vector<T> {
             unsafe { Some(ptr::read(self.mem.ptr.offset(self.len as isize))) }
         }
     }
-    fn len(&self) -> usize {
+    /// Insert item to given index
+    pub fn insert(&mut self, index: usize, item: T) {
+    	assert!(index <= self.len, "Index out of bounds!");
+    	if self.mem.cap == self.len {
+    		self.mem.grow();
+    	}
+    	unsafe {
+    		if index < self.len {
+    			ptr::copy(self.mem.ptr.offset(index as isize),
+    				self.mem.ptr.offset(index as isize + 1),
+    				self.len - index
+    			);
+    			ptr::write(self.mem.ptr.offset(index as isize), item);
+    			self.len += 1;
+    		}
+    	}
+    }
+    /// Remove and return item from given index
+    pub fn remove(&mut self, index: usize) -> T{
+    	assert!(index < self.len, "Index out of bounds!");
+    	unsafe {
+    		self.len -= 1;
+    		let result = ptr::read(self.mem.ptr.offset(index as isize));
+			ptr::copy(self.mem.ptr.offset(index as isize + 1),
+				self.mem.ptr.offset(index as isize),
+				self.len - index
+			);
+			result
+    	}
+    }
+    pub fn len(&self) -> usize {
     	self.len
     }
-    fn get_cap(&self) -> usize {
+    pub fn get_cap(&self) -> usize {
         self.mem.cap
     }
 }
@@ -207,6 +237,32 @@ impl<T> DerefMut for Vector<T> {
         unsafe { slice::from_raw_parts_mut(*self.mem.ptr, self.len) }
     }
 }
+
+impl<T: Clone> Clone for Vector<T> {
+	fn clone(&self) -> Self {
+		let mut clone = Vector::new_with_size(self.len);
+		for i in 0..self.len {
+			clone.push(self[i].clone());
+		}
+		clone
+	}
+}
+
+impl<T: PartialEq> PartialEq for Vector<T> {
+	fn eq(&self, other: &Vector<T>) -> bool {
+		if self.len != other.len {
+			return false
+		}
+		for i in 0..self.len {
+			if self[i] != other[i] {
+				return false
+			}
+		}
+		true
+	}
+}
+
+impl<T: Eq> Eq for Vector<T> {}
 
 impl<T> Matrix<T> {
 	pub fn new(width: usize, height: usize) -> Self{
