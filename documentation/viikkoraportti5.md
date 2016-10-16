@@ -37,3 +37,11 @@ että alkupopulaatio-kromosomien luonti toimii aivan väärin. Korjasin tämän 
 olin ajatellut, ja lisäsin vähän satunnaisuutta sekoitukseen.
 
 Aikaa käytetty 1h
+
+**16.10.**
+Vaihdoin Rustin standardivektrorista omaan vektori-implementaatiooni. Kirjoittelin dokumentaatiota,
+vertaisarvioita sekä tutustuin Rustin benchmarktestaukseen.
+
+Aikaa käytetty 3h.
+
+Yhteensä aikaa käytetty näiden kahden viikon aikana 10h.
