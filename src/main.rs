@@ -24,7 +24,7 @@ fn main() { //TODO: Move all this to actual functions
 	println!("{:?}", population[0].genes[0].center());
 	let layout = population[0].as_layout();
 	let matrix = layout.as_char_matrix();
-	match output::save(matrix, String::from("initial.txt")) {
+	match output::save_matrix(matrix, String::from("initial.txt")) {
 		Err(reason) => panic!("{:?}", reason),
 		Ok(_) => {}
 	};
@@ -55,7 +55,7 @@ fn main() { //TODO: Move all this to actual functions
 	println!("{:?}", population[0].genes[0].center());
 	let layout = population[0].as_layout();
 	let matrix = layout.as_char_matrix();
-	match output::save(matrix, String::from("final.txt")) {
+	match output::save_matrix(matrix, String::from("final.txt")) {
 		Err(reason) => panic!("{:?}", reason),
 		Ok(_) => {}
 	};
