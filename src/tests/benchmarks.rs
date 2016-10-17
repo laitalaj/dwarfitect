@@ -16,7 +16,7 @@ fn breeding_benchmark(b: &mut Bencher) {
 	}
 	let mut rng = rand::thread_rng();
 	let population = breeding::generate_initial_population(
-		genes, 500, &mut rng);
+		genes, Vector::new(), 500, &mut rng);
 	b.iter(|| {
 		breeding::breed(population.clone(), &mut rng); //TODO: Find out how to do this without cloning
 	});

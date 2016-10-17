@@ -32,10 +32,20 @@ pub struct Gene {
     gene_id: isize,
 }
 
+/// Targets are the aims of the program and the measures of fitness; they
+/// determine which genes should be as close to each other as possible.
+#[derive(PartialEq, Clone)]
+pub struct Target {
+	from_id: Vector<usize>,
+	to_id: Vector<usize>,
+	weight: f32
+}
+
 /// Chromosomes are possible solutions. They handle the genetic operations.
 #[derive(PartialEq, Clone)]
 pub struct Chromosome {
     pub genes: Vector<Gene>, //TODO: Instead of pub, getters / setters?
+    pub targets: Vector<Target>,
     total_area: isize,
     pub fitness: f32,
     bounding_box: Rect,
@@ -141,13 +151,14 @@ impl Debug for Chromosome {
 impl Chromosome {
     /// A constructor for the chromosome. Creates the chromosome and relaxes
     /// it.
-    pub fn new(genes: Vector<Gene>) -> Chromosome {
+    pub fn new(genes: Vector<Gene>, targets: Vector<Target>) -> Chromosome {
         let mut total_area = 0;
         for i in 0..genes.len() {
             total_area += genes[i].area();
         }
         let mut new_chromosome = Chromosome {
             genes: genes,
+            targets: targets,
             total_area: total_area,
             fitness: 0.0,
             bounding_box: Rect {
@@ -163,8 +174,8 @@ impl Chromosome {
     }
     /// Generates a more randomized (and perhaps more valid) initial chromosome
     /// from given genes.
-    pub fn generate_initial<R: Rng>(genes: Vector<Gene>, rng: &mut R) 
-    -> Chromosome {
+    pub fn generate_initial<R: Rng>(genes: Vector<Gene>, targets: Vector<Target>,
+    	rng: &mut R) -> Chromosome {
         let mut shuffled_genes = genes.clone();
         shuffled_genes[0].set_center(0, 0);
         rng.shuffle(&mut shuffled_genes[1..]);
@@ -224,7 +235,7 @@ impl Chromosome {
         }
         shuffled_genes.sort();
 //        shuffled_genes.insert(0, genes[0].set_pos(0, 0));
-        Chromosome::new(shuffled_genes)
+        Chromosome::new(shuffled_genes, targets)
     }
     /// Relaxes the chromosome: moves every gene so that no two genes collide.
     /// Recalculates fitness when done.
@@ -337,8 +348,8 @@ impl Chromosome {
                 partners_childs_genes.push(partner.genes[i]);
             }
         }
-        let my_child = Chromosome::new(my_childs_genes);
-        let partners_child = Chromosome::new(partners_childs_genes);
+        let my_child = Chromosome::new(my_childs_genes, self.targets.clone());
+        let partners_child = Chromosome::new(partners_childs_genes, self.targets.clone());
         // 		my_child.relax();
         // 		partners_child.relax();
         (my_child, partners_child)
@@ -513,8 +524,8 @@ mod tests {
         let mut genes2 = Vector::new();
         genes2.push(gene3);
         genes2.push(gene4);
-        let chrom1 = Chromosome::new(genes1);
-        let chrom2 = Chromosome::new(genes2);
+        let chrom1 = Chromosome::new(genes1, Vector::new());
+        let chrom2 = Chromosome::new(genes2, Vector::new());
         let crossover_delta = CROSSOVER_CHANCE * 0.1;
         let mut random_numbers = Vector::new();
         random_numbers.push(CROSSOVER_CHANCE - crossover_delta);
@@ -541,7 +552,7 @@ mod tests {
         	let h = (i*7)%11 + 3;
         	gene_vec.push(Gene::new(Rect { x: x, y: y, w: w, h: h }, i));
         }
-        let mut genes = Chromosome::new(gene_vec);
+        let mut genes = Chromosome::new(gene_vec, Vector::new());
         genes.relax();
         for i in 0..genes.genes.len() {
             for j in i + 1..genes.genes.len() {
@@ -600,7 +611,7 @@ mod tests {
         gene_vec.push(gene2);
         gene_vec.push(gene3);
         gene_vec.push(gene4);
-        let mut genes = Chromosome::new(gene_vec);
+        let mut genes = Chromosome::new(gene_vec, Vector::new());
         genes.relax();
         for i in 0..genes.genes.len() {
             assert_eq!(i as isize, genes.genes[i].gene_id);
@@ -656,6 +667,7 @@ mod tests {
         gene_vec.push(gene4);
         let mut genes = Chromosome {
 		    genes: gene_vec,
+		    targets: Vector::new(),
 		    total_area: gene1.area() + gene2.area() + gene3.area() + gene4.area(),
 		    fitness: 0.0,
 		    bounding_box: Rect::new(0, 0, 0, 0),

@@ -6,14 +6,14 @@ use rustc_serialize::json;
 
 #[derive(Copy, Clone, PartialEq, RustcDecodable, RustcEncodable)]
 pub struct TargetBlueprint {
-    from_id: usize,
-    to_id: usize,
+    from_key: usize,
+    to_key: usize,
     weight: f32,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, RustcDecodable, RustcEncodable)]
 pub struct RoomBlueprint {
-    id: usize,
+    key: usize,
     width: usize,
     height: usize,
     amount: usize,
@@ -53,29 +53,29 @@ mod tests {
     #[test]
     fn read_works() {
         let tbp1 = TargetBlueprint {
-            from_id: 0,
-            to_id: 1,
+            from_key: 0,
+            to_key: 1,
             weight: 1.2,
         };
         let tbp2 = TargetBlueprint {
-            from_id: 1,
-            to_id: 2,
+            from_key: 1,
+            to_key: 2,
             weight: 1.1,
         };
         let rbp0 = RoomBlueprint {
-            id: 0,
+            key: 0,
             width: 3,
             height: 3,
             amount: 1,
         };
         let rbp1 = RoomBlueprint {
-            id: 1,
+            key: 1,
             width: 5,
             height: 5,
             amount: 3,
         };
         let rbp2 = RoomBlueprint {
-            id: 2,
+            key: 2,
             width: 6,
             height: 2,
             amount: 2,
@@ -85,7 +85,10 @@ mod tests {
             targets: vec![tbp1, tbp2],
         };
         let encoded_bp = json::encode(&bp).unwrap();
-        save(encoded_bp, String::from("test.json"));
+        match save(encoded_bp, String::from("test.json")) {
+        	Ok(_) => {},
+        	Err(reason) => panic!("{:?}", reason)
+        };
         let read_bp = read(String::from("test.json"));
         assert_eq!(read_bp.rooms.len(), bp.rooms.len());
         assert_eq!(read_bp.targets.len(), bp.targets.len());

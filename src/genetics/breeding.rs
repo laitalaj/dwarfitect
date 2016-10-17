@@ -2,7 +2,7 @@ use rand::Rng;
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
 use std::fmt::{Debug, Formatter, Result};
-use super::genes::{Gene, Chromosome};
+use super::genes::{Gene, Target, Chromosome};
 use collections::Vector;
 
 /// Percentage of population that should be kept alive for the next round of
@@ -72,11 +72,12 @@ pub fn search_candidate<'a>(candidates: &'a Vector<Candidate>, random_value: f32
 }
 
 /// Generates an initial population with determined size
-pub fn generate_initial_population<R: Rng>(genes: Vector<Gene>, size: usize,
-  rng: &mut R) -> Vector<Chromosome> {
+pub fn generate_initial_population<R: Rng>(genes: Vector<Gene>, 
+	targets: Vector<Target>, size: usize, rng: &mut R) -> Vector<Chromosome> {
     let mut population: Vector<Chromosome> = Vector::new();
     for _ in 0..size {
-        population.push(Chromosome::generate_initial(genes.clone(), rng));
+        population.push(Chromosome::generate_initial(genes.clone(), 
+        		targets.clone(), rng));
     }
     population
 }
@@ -137,8 +138,10 @@ pub fn purge<R: Rng>(population: &mut Vector<Chromosome>, rng: &mut R) {
   let kill = population.len() as f32 * PURGE_PERCENTAGE;
     let kill_usize = kill.round() as usize;
     let genes = population[0].genes.clone();
+    let targets = population[0].targets.clone();
     for i in kill_usize..population.len() {
-      population[i] = Chromosome::generate_initial(genes.clone(), rng);
+      population[i] = Chromosome::generate_initial(genes.clone(), 
+      	targets.clone(), rng);
     }
 }
 
@@ -188,7 +191,7 @@ mod tests {
         genes.push(gene3);
         genes.push(gene4);
         let initial_pop = generate_initial_population(
-          genes, 100, &mut rng
+          genes, Vector::new(), 100, &mut rng
         );
         assert_eq!(100, initial_pop.len());
         let next_pop = breed(initial_pop, &mut rng);
@@ -200,7 +203,7 @@ mod tests {
       let rect = Rect { x:0, y:0, w:2, h:2 };
       let mut dummy_genes = Vector::new();
       dummy_genes.push(Gene::new(rect, 1));
-      let mut chromosome = Chromosome::new(dummy_genes);
+      let mut chromosome = Chromosome::new(dummy_genes, Vector::new());
       let mut chromosomes = Vector::new();
       let mut candidates = Vector::new();
       for _ in 0..10 {

@@ -17,7 +17,7 @@ fn main() { //TODO: Move all this to actual functions
 	}
 	let mut rng = rand::thread_rng();
 	let mut population = breeding::generate_initial_population(
-		genes, 500, &mut rng);
+		genes, Vector::new(), 500, &mut rng);
 	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
 	population.reverse();
 	println!("{:?}: {:?}", population[0], population[0].genes[0]);
