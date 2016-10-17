@@ -1,10 +1,7 @@
-use std::cmp::Ordering::Equal;
-use std::cell::RefCell;
 use mapping::shapes::Rect;
 use genetics::genes::Gene;
 use genetics::breeding;
 use collections::Vector;
-use io::output;
 use rand;
 
 extern crate test;
@@ -18,7 +15,7 @@ fn breeding_benchmark(b: &mut Bencher) {
 		genes.push(Gene::new(rect, i - 1));
 	}
 	let mut rng = rand::thread_rng();
-	let mut population = breeding::generate_initial_population(
+	let population = breeding::generate_initial_population(
 		genes, 500, &mut rng);
 	b.iter(|| {
 		breeding::breed(population.clone(), &mut rng); //TODO: Find out how to do this without cloning
