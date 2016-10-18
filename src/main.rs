@@ -12,6 +12,10 @@ use dwarfilib::io::{output, input};
 fn main() { //TODO: Move all this to actual functions
 	let bp = input::read("input.json".to_string());
 	let (genes, targets) = bp.compile();
+	let mut rng = rand::thread_rng();
+	let mut population = breeding::generate_initial_population(
+		genes, targets, 500, &mut rng
+	);
 //	let mut genes: Vector<Gene> = Vector::new();
 //	for i in 1..17 {
 //		let rect = Rect{ x: 0, y: 0, w: (i*13)%7 + 4, h: (i*5)%7 + 4};
@@ -20,45 +24,25 @@ fn main() { //TODO: Move all this to actual functions
 //	let mut rng = rand::thread_rng();
 //	let mut population = breeding::generate_initial_population(
 //		genes, Vector::new(), 500, &mut rng);
-//	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
-//	population.reverse();
-//	println!("{:?}: {:?}", population[0], population[0].genes[0]);
-//	println!("{:?}", population[0].genes[0].center());
-//	let layout = population[0].as_layout();
-//	let matrix = layout.as_char_matrix();
-//	match output::save_matrix(matrix, String::from("initial.txt")) {
-//		Err(reason) => panic!("{:?}", reason),
-//		Ok(_) => {}
-//	};
-//	let mut last_fitness: f32 = 0.0;
-//	let mut counter = 0;
-//	for i in 0..3001 {
-//		population = breeding::breed(population, &mut rng);
-//		if i % 200 == 0 {
-//			population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
-//			population.reverse();
-//			println!("{:?}: {:?}", i, population[0]);
-//			if population[0].fitness > last_fitness {
-//				last_fitness = population[0].fitness;
-//				counter = 0;
-//			} else {
-//				println!("PURGE!");
-//				counter += 1;
-//				if counter == 7 {
-//					break;
-//				}
-//				breeding::purge(&mut population, &mut rng);
-//			}
-//		}
-//	}
-//	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
-//	population.reverse();
-//	println!("{:?}: {:?}", population[0], population[0].genes[0]);
-//	println!("{:?}", population[0].genes[0].center());
-//	let layout = population[0].as_layout();
-//	let matrix = layout.as_char_matrix();
-//	match output::save_matrix(matrix, String::from("final.txt")) {
-//		Err(reason) => panic!("{:?}", reason),
-//		Ok(_) => {}
-//	};
+	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
+	population.reverse();
+	println!("{:?}: {:?}", population[0], population[0].genes[0]);
+	println!("{:?}", population[0].genes[0].center());
+	let layout = population[0].as_layout();
+	let matrix = layout.as_char_matrix();
+	match output::save_matrix(matrix, String::from("initial.txt")) {
+		Err(reason) => panic!("{:?}", reason),
+		Ok(_) => {}
+	};
+	population = breeding::breed_for(population, 2000, &mut rng);
+	population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
+	population.reverse();
+	println!("{:?}: {:?}", population[0], population[0].genes[0]);
+	println!("{:?}", population[0].genes[0].center());
+	let layout = population[0].as_layout();
+	let matrix = layout.as_char_matrix();
+	match output::save_matrix(matrix, String::from("final.txt")) {
+		Err(reason) => panic!("{:?}", reason),
+		Ok(_) => {}
+	};
 }

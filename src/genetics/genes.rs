@@ -321,6 +321,7 @@ impl Chromosome {
     pub fn calculate_fitness(&mut self) {
     	if self.targets.len() == 0 {
     		self.calculate_area_fitness();
+    		println!("Whoops!");
     	} else {
     		self.calculate_distance_fitness();
     	}

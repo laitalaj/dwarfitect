@@ -10,6 +10,8 @@ use collections::Vector;
 pub const KEEP_ALIVE_PERCENTAGE: f32 = 0.1;
 /// Percentage of population to kill when purging a population
 pub const PURGE_PERCENTAGE: f32 = 0.7;
+/// How many generations of stagnation before purge
+pub const PURGE_INTERVAL: usize = 100;
 
 /// Candidate is a container for a chromosome with a determined probability
 /// of selection for breeding
@@ -81,6 +83,19 @@ pub fn generate_initial_population<R: Rng>(genes: Vector<Gene>,
     }
     population
 }
+	
+/// Returns the most fit chromosome in a population
+pub fn most_fit(population: &Vector<Chromosome>) -> Option<&Chromosome> {
+	let mut most_fit = None;
+	let mut largest_fitness = 0.0;
+	for i in 0..population.len() {
+		if population[i].fitness > largest_fitness {
+			most_fit = Some(&population[i]);
+			largest_fitness = population[i].fitness;
+		}
+	}
+	most_fit
+}
 
 /// Breeds a population by 1 step; generates and mutates children and returns
 /// the next population.
@@ -143,6 +158,31 @@ pub fn purge<R: Rng>(population: &mut Vector<Chromosome>, rng: &mut R) {
       population[i] = Chromosome::generate_initial(genes.clone(), 
       	targets.clone(), rng);
     }
+}
+
+pub fn breed_for<R: Rng>(population: Vector<Chromosome>, generations: usize, 
+	rng: &mut R) -> Vector<Chromosome> {
+	let mut last_fitness = 0.0;
+	let mut work_population = population.clone();
+	let mut purge_imminent = false;
+	for i in 0..generations {
+		work_population = breed(work_population, rng);
+		if i % PURGE_INTERVAL == 0 {
+			let most_fit = most_fit(&work_population).unwrap();
+			println!("{}: {:?}", i, most_fit);
+			if most_fit.fitness > last_fitness {
+				last_fitness = most_fit.fitness;
+			} else {
+				purge_imminent = true;
+			} 
+		}
+		if purge_imminent {
+			print!(" -> Purging population");
+			purge(&mut work_population, rng);
+			purge_imminent = false;
+		}
+	}
+	work_population
 }
 
 #[cfg(test)]
