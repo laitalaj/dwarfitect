@@ -36,9 +36,9 @@ pub struct Gene {
 /// determine which genes should be as close to each other as possible.
 #[derive(PartialEq, Clone)]
 pub struct Target {
-	from_id: Vector<usize>,
-	to_id: Vector<usize>,
-	weight: f32
+	pub from_id: Vector<usize>,
+	pub to_id: Vector<usize>,
+	pub weight: f32
 }
 
 /// Chromosomes are possible solutions. They handle the genetic operations.
@@ -131,6 +131,12 @@ impl Gene {
     	new_rect.h -= 1;
     	Room::new(new_rect)
     }
+}
+
+impl Target {
+	pub fn new(from: Vector<usize>, to: Vector<usize>, weight: f32) -> Target {
+		Target { from_id: from, to_id: to, weight: weight }
+	}
 }
 
 impl PartialOrd for Chromosome {
@@ -312,12 +318,39 @@ impl Chromosome {
         };
         self.bounding_box_fresh = true;
     }
+    pub fn calculate_fitness(&mut self) {
+    	if self.targets.len() == 0 {
+    		self.calculate_area_fitness();
+    	} else {
+    		self.calculate_distance_fitness();
+    	}
+    }
+    pub fn calculate_distance_fitness(&mut self) {
+    	let mut total_dist = 0.0;
+    	let mut distances = 0; //TODO: Calculate in constructor?
+    	for t in 0..self.targets.len() {
+    		let mut target_dist = 0.0;
+    		for i in 0..self.targets[t].from_id.len() {
+    			for j in 0..self.targets[t].to_id.len() {
+    				let from = self.targets[t].from_id[i];
+    				let to = self.targets[t].to_id[j];
+    				target_dist += self.genes[from].dist(self.genes[to]);
+    				distances += 1;
+    			}
+    		}
+    		target_dist *= self.targets[t].weight;
+    		total_dist += target_dist;
+    	}
+    	// TODO: Guard against division by zero
+    	let raw_fitness = total_dist / distances as f32;
+    	self.fitness = 1.0 / raw_fitness.log10().abs();
+    }
     /// Calculates this chromosome's fitness. Currently does this by comparing
     /// area  used up by the genes to the area of the minimum bounding box
     /// (so compact, rectangular designs flourish at the moment).
     /// Calls calculate_bounding_box in the beginning if the bounding box is not
     /// fresh.
-    pub fn calculate_fitness(&mut self) {
+    pub fn calculate_area_fitness(&mut self) {
         // TODO: Actual fitness calculation
         if !self.bounding_box_fresh {
             self.calculate_bounding_box();

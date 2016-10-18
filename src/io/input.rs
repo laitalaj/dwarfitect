@@ -1,4 +1,7 @@
 use collections::Vector;
+use std::collections::HashMap; //TODO: Own implementations of hashmap!
+use genetics::genes::{Gene, Target};
+use mapping::shapes::Rect;
 use std::io::Read;
 use std::fs::File;
 use std::path::Path;
@@ -14,8 +17,8 @@ pub struct TargetBlueprint {
 #[derive(Copy, Clone, PartialEq, Eq, RustcDecodable, RustcEncodable)]
 pub struct RoomBlueprint {
     key: usize,
-    width: usize,
-    height: usize,
+    width: isize, //TODO: Refactor to usize
+    height: isize,
     amount: usize,
 }
 
@@ -26,6 +29,33 @@ pub struct Blueprint {
     // honest, gov'nor.
     pub rooms: Vec<RoomBlueprint>,
     pub targets: Vec<TargetBlueprint>,
+}
+
+impl Blueprint {
+	pub fn compile(&self) -> (Vector<Gene>, Vector<Target>) {
+		let mut key_to_id = HashMap::new();
+		let mut genes = Vector::new(); //TODO: new_with_size?
+		let mut targets = Vector::new();
+		let mut current_id: usize = 0;
+		for i in 0..self.rooms.len() {
+			let mut ids = Vector::new();
+			let room = self.rooms[i];
+			let rect = Rect::new(0, 0, room.width, room.height);
+			for _ in 0..self.rooms[i].amount {
+				genes.push(Gene::new(rect, current_id as isize));
+				ids.push(current_id);
+				current_id += 1;
+			}
+			key_to_id.insert(room.key, ids);
+		}
+		for i in 0..self.targets.len() {
+			let target = self.targets[i];
+			let from = key_to_id.get(&target.from_key).unwrap().clone();
+			let to = key_to_id.get(&target.to_key).unwrap().clone();
+			targets.push(Target::new(from, to, target.weight));
+		}
+		(genes, targets)
+	}
 }
 
 pub fn read(filename: String) -> Blueprint {

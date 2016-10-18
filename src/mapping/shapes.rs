@@ -90,6 +90,10 @@ impl Rect {
             y: self.y + self.h,
         }
     }
+    /// Dets distance between this rects and other rects centers
+    pub fn dist(&self, other: Rect) -> f32 {
+    	self.center().dist(other.center())
+    }
     /// Sets the center of the rect to given value
     pub fn set_center(&mut self, x: isize, y: isize) {
     	let current_center = self.center();
@@ -133,6 +137,10 @@ macro_rules! impl_rect_methods {
 		    /// Gives the area of this structs's rect
 		    pub fn area(&self) -> isize {
 		        self.$rect.area()
+		    }
+		    /// Gives distance between this struct's and ohter struct's centers
+		    pub fn dist(&self, other: $Struct) -> f32 {
+		    	self.$rect.dist(other.$rect)
 		    }
 		    /// Gets the center point (x+w/2, y+h/2) of this structs's rect
 		    pub fn center(&self) -> Point {
