@@ -169,20 +169,35 @@ pub fn breed_for<R: Rng>(population: Vector<Chromosome>, generations: usize,
 		work_population = breed(work_population, rng);
 		if i % PURGE_INTERVAL == 0 {
 			let most_fit = most_fit(&work_population).unwrap();
-			println!("{}: {:?}", i, most_fit);
+			print!("{}: {:?}", i, most_fit);
 			if most_fit.fitness > last_fitness {
 				last_fitness = most_fit.fitness;
 			} else {
 				purge_imminent = true;
 			} 
+			if !purge_imminent {
+				println!("");
+			}
 		}
 		if purge_imminent {
-			print!(" -> Purging population");
+			println!(" -> Purging population");
 			purge(&mut work_population, rng);
 			purge_imminent = false;
 		}
 	}
 	work_population
+}
+	
+pub fn breeder<R: Rng>(genes: Vector<Gene>, targets: Vector<Target>, 
+	pop_size: usize, generations: usize, rng: &mut R) -> Chromosome {
+	let mut population = generate_initial_population(
+		genes, targets, pop_size, rng
+	);
+	population = breed_for(population, generations, rng);
+	match most_fit(&population) {
+		None => panic!("Couldn't find most fit chromosome!"),
+		Some(chromosome) => chromosome.clone()
+	}
 }
 
 #[cfg(test)]

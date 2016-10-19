@@ -21,7 +21,7 @@ pub const MUTATIONS: [Mutation; 2] = [RotationMutation, PositionMutation];
 /// Possible mutation types; just plain old enums
 pub enum Mutation {
     RotationMutation,
-    PositionMutation,
+    PositionMutation
 }
 
 /// Genes are rooms represented only by their bounding rectangle. A chromosome
@@ -82,17 +82,14 @@ impl Gene {
     fn mutate<R: Rng>(&mut self, allowed_area: Rect, rng: &mut R) {
         let allowed_end = allowed_area.bottom_right();
         let allowed_x = Range::new(allowed_area.x, allowed_end.x);
-        // TODO: make sure the whole gene stays in the area (not just the topleft corner)
         let allowed_y = Range::new(allowed_area.y, allowed_end.y);
         match rng.choose(&MUTATIONS) {
             Some(m) => {
                 match *m {
                     RotationMutation => self.rot_in_place(),
-                    PositionMutation => {
-                        // TODO: Transition amount by chromosome fitness?
-                        self.set_x(allowed_x.ind_sample(rng));
-                        self.set_y(allowed_y.ind_sample(rng));
-                    }
+                    PositionMutation => self.set_center(
+                    	allowed_x.ind_sample(rng), allowed_y.ind_sample(rng))
+                    // TODO: Transition amount by chromosome fitness?
                     // _ => panic!("Got a mutation type that's not yet implemented!")
                     // Having a mutation type that's not implemented and still being able to compile
                     // seems to be impossible. Rust <3
@@ -194,6 +191,7 @@ impl Chromosome {
         places_to_go.push((top_left_0.x, top_left_0.y, Up));
         places_to_go.push((bottom_right_0.x, top_left_0.y, Right));
         places_to_go.push((top_left_0.x, bottom_right_0.y, Down));
+        rng.shuffle(&mut places_to_go);
         for i in 1..shuffled_genes.len() {
             let place = places_to_go.remove(0); //TODO: Create an efficient queue
             let mut x = place.0;
@@ -328,23 +326,26 @@ impl Chromosome {
     }
     pub fn calculate_distance_fitness(&mut self) {
     	let mut total_dist = 0.0;
-    	let mut distances = 0; //TODO: Calculate in constructor?
+    	let mut divisor = 0.0;
     	for t in 0..self.targets.len() {
     		let mut target_dist = 0.0;
+    		let mut n = 0;
     		for i in 0..self.targets[t].from_id.len() {
     			for j in 0..self.targets[t].to_id.len() {
     				let from = self.targets[t].from_id[i];
     				let to = self.targets[t].to_id[j];
     				target_dist += self.genes[from].dist(self.genes[to]);
-    				distances += 1;
+    				n += 1;
     			}
     		}
     		target_dist *= self.targets[t].weight;
+    		target_dist /= n as f32;
+    		divisor += self.targets[t].weight;
     		total_dist += target_dist;
     	}
     	// TODO: Guard against division by zero
-    	let raw_fitness = total_dist / distances as f32;
-    	self.fitness = 1.0 / raw_fitness.log10().abs();
+    	let weighted_average = total_dist / divisor;
+    	self.fitness = (10000.0 as f32).powf(self.targets.len() as f32 / weighted_average);
     }
     /// Calculates this chromosome's fitness. Currently does this by comparing
     /// area  used up by the genes to the area of the minimum bounding box
