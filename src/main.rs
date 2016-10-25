@@ -3,7 +3,7 @@ extern crate rand;
 extern crate dwarfilib;
 use dwarfilib::genetics::breeding;
 use dwarfilib::io::{output, input};
-use dwarfilib::io::ui::get_usize;
+use dwarfilib::io::ui::get_parsed_input;
 
 /// A makeshift main-function, used to test functionality.
 fn main() { //TODO: Move all this to actual functions
@@ -11,9 +11,9 @@ fn main() { //TODO: Move all this to actual functions
 	let (genes, targets) = bp.compile();
 	let mut rng = rand::thread_rng();
 	println!("Population size: ");
-	let pop_size = get_usize().expect("Failed )-:");
+	let pop_size: usize = get_parsed_input().expect("Failed )-:");
 	println!("Generations: ");
-	let generations = get_usize().expect("Failed )-:");
+	let generations: usize = get_parsed_input().expect("Failed )-:");
 	let result = breeding::breeder(genes, targets, pop_size, generations, &mut rng);
 	println!("{:?}: {:?}", result, result.genes[0]);
 	println!("{:?}", result.genes[0].center());
