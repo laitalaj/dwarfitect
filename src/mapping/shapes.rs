@@ -28,6 +28,7 @@ pub struct Rect {
 }
 
 impl Point {
+	/// Creates a new point with given coordinates
 	pub fn new(x: isize, y: isize) -> Self {
 		Point { x: x, y: y }
 	}
@@ -47,6 +48,7 @@ impl Point {
 }
 
 impl Rect {
+	/// Creates a new Rect with given dimensions
 	pub fn new(x: isize, y: isize, w: isize, h: isize) -> Rect {
 		Rect{ x: x, y: y, w: w, h: h}
 	}

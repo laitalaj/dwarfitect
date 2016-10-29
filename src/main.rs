@@ -1,4 +1,3 @@
-//use sfml::graphics::{RenderTexture};
 extern crate rand;
 extern crate dwarfilib;
 use dwarfilib::genetics::breeding;
@@ -9,6 +8,7 @@ use dwarfilib::io::ui::{get_input_loop, get_parsed_input_loop};
 /// # Panics
 /// Panics if unable to read or save for some reason
 fn main() { //TODO: Move all this to actual functions
+	println!("############\n#DWARFITECT#\n############");
 	println!("Input file name: ");
 	let input_file = get_input_loop();
 	println!("Output file name: ");

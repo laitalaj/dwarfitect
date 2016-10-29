@@ -1,3 +1,5 @@
+//! UI contains functions that do user interaction
+
 use std::io::{self, Error, ErrorKind};
 use std::str::FromStr;
 
@@ -27,7 +29,7 @@ pub fn get_input_loop() -> String {
 	loop {
 		match get_input() {
 			Ok(s) => return s,
-			Err(reason) => println!("Error: {:?}. Please try again.", reason)
+			Err(reason) => println!("Error: {}. Please try again.", reason)
 		};
 	}
 }
@@ -37,7 +39,7 @@ pub fn get_parsed_input_loop<T: FromStr>() -> T {
 	loop {
 		match get_parsed_input() {
 			Ok(i) => return i,
-			Err(reason) => println!("Error: {:?}. Please try again.", reason)
+			Err(reason) => println!("Error: {}. Please try again.", reason)
 		}
 	}
 }

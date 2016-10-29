@@ -239,6 +239,8 @@ impl<T> DerefMut for Vector<T> {
 }
 
 impl<T: Clone> Clone for Vector<T> {
+	/// Clones the vector's contents and returns a new vector with those 
+	/// contents
 	fn clone(&self) -> Self {
 		let mut clone = Vector::new_with_size(self.len);
 		for i in 0..self.len {
@@ -249,6 +251,8 @@ impl<T: Clone> Clone for Vector<T> {
 }
 
 impl<T: PartialEq> PartialEq for Vector<T> {
+	/// Compares vectors by their content; if this[i] == other[i] with all
+	/// 0 <= i < this.len and this.len == other.len, the vectors are equal
 	fn eq(&self, other: &Vector<T>) -> bool {
 		if self.len != other.len {
 			return false
@@ -265,6 +269,7 @@ impl<T: PartialEq> PartialEq for Vector<T> {
 impl<T: Eq> Eq for Vector<T> {}
 
 impl<T> Matrix<T> {
+	/// Creates a new matrix with given dimensions and fills it with None
 	pub fn new(width: usize, height: usize) -> Self{
 		let mut mem = Vector::new_with_size(width * height);
 		for _ in 0..width*height {
@@ -276,9 +281,11 @@ impl<T> Matrix<T> {
 			h: height
 		}
 	}
+	/// Get an item from location x, y, wrapped in option.
 	pub fn get(&self, x: usize, y: usize) -> &Option<T> {
 		&self.mem[y * self.w + x]
 	}
+	/// Sets item in location x, y to item.
 	pub fn set(&mut self, x: usize, y: usize, item: T) {
 		self.mem[y * self.w + x] = Some(item);
 	}

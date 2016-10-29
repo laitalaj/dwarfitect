@@ -1,3 +1,6 @@
+//! This module contains functions that manipulate populations (vectors of
+//! chromosomes). Functionality such as control of who mates who is found here.
+
 use rand::Rng;
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
@@ -146,7 +149,7 @@ pub fn breed<R: Rng>(population: Vector<Chromosome>, rng: &mut R)
 }
 
 /// Replaces number of worst chromosomes equal to PURGE_PERCENTAGE with initial
-/// chromosomes. Doesn't work too well as of now...
+/// chromosomes.
 pub fn purge<R: Rng>(population: &mut Vector<Chromosome>, rng: &mut R) {
   population.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Equal));
     population.reverse(); //TODO: Get rid of excess sorts
@@ -160,6 +163,7 @@ pub fn purge<R: Rng>(population: &mut Vector<Chromosome>, rng: &mut R) {
     }
 }
 
+/// Breeds population for given number of generations
 pub fn breed_for<R: Rng>(population: Vector<Chromosome>, generations: usize, 
 	rng: &mut R) -> Vector<Chromosome> {
 	let mut last_fitness = 0.0;
@@ -169,7 +173,8 @@ pub fn breed_for<R: Rng>(population: Vector<Chromosome>, generations: usize,
 		work_population = breed(work_population, rng);
 		if i % PURGE_INTERVAL == 0 {
 			let most_fit = most_fit(&work_population).unwrap();
-			print!("{}: {:?}", i, most_fit);
+			print!("Generation {}/{}, largest fitness: {}", i, generations,
+			most_fit.fitness);
 			if most_fit.fitness > last_fitness {
 				last_fitness = most_fit.fitness;
 			} else {
@@ -180,7 +185,7 @@ pub fn breed_for<R: Rng>(population: Vector<Chromosome>, generations: usize,
 			}
 		}
 		if purge_imminent {
-			println!(" -> Purging population");
+			println!(" -> Purging stale population");
 			purge(&mut work_population, rng);
 			purge_imminent = false;
 		}
@@ -188,6 +193,10 @@ pub fn breed_for<R: Rng>(population: Vector<Chromosome>, generations: usize,
 	work_population
 }
 	
+/// Creates a population of given size from genes and targets and breeds it for
+/// given amount of generations.
+/// # Panics
+/// Panics if can't for some reason find a most fit chromosomes.
 pub fn breeder<R: Rng>(genes: Vector<Gene>, targets: Vector<Target>, 
 	pop_size: usize, generations: usize, rng: &mut R) -> Chromosome {
 	let mut population = generate_initial_population(

@@ -1,4 +1,5 @@
-//! Module for genetic structs
+//! Module for genetic structs and methods for those structs. This is the
+//! backbone of this program.
 
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter, Result};

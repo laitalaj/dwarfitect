@@ -1,11 +1,15 @@
+//! This module contains functionality related to manipulating a solution.
+
 use mapping::shapes::{Rect, Point};
 use std::cmp::Ordering;
 use collections::{Matrix, Vector};
 
+/// Room is the equvalient of Gene in a finished solution
 pub struct Room {
     rect: Rect,
 }
 
+/// Layout is the equvalient of Chromosome in a finished solution
 pub struct Layout {
     rooms: Vector<Room>,
 }
@@ -14,15 +18,18 @@ pub struct Layout {
 impl_rect_methods!(Room, rect);
 
 impl Room {
+	/// Creates a new room from given rect
     pub fn new(rect: Rect) -> Self {
         Room { rect: rect }
     }
 }
 
 impl Layout {
+	/// Creates a new layout from given rooms
     pub fn new(rooms: Vector<Room>) -> Self {
         Layout { rooms: rooms }
     }
+    /// Calculates a smallest bounding box for the layout
     fn calculate_bounding_box(&self) -> Rect {
         let mut min_x = isize::max_value();
         let mut min_y = isize::max_value();
@@ -51,6 +58,7 @@ impl Layout {
             h: max_y - min_y,
         }
     }
+    /// Converts the layout to a char matrix for saving purposes
     pub fn as_char_matrix(&self) -> Matrix<char> {
         let bounding_box = self.calculate_bounding_box();
         let top_left = bounding_box.top_left();

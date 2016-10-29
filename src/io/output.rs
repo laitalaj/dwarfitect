@@ -1,3 +1,5 @@
+//! This module contains functionality that writes files on the disk.
+
 use std::io::{Write, Error};
 use std::fs::File;
 use collections::Matrix;
@@ -19,6 +21,7 @@ pub fn save_matrix(matrix: Matrix<char>, filename: String) -> Result<(), Error>{
 	save(output, filename)
 }
 
+/// Save given string to a file.
 pub fn save(data: String, filename: String) -> Result<(), Error> {
 	let mut file = try!(File::create(filename));
 	try!(file.write_all(data.as_bytes()));

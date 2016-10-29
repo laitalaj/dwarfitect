@@ -1,5 +1,10 @@
+//! This module contains functions related to reading data from the hard drive
+//! and converting it into a format that can be understood by the genetic
+//! algorithmics.
+
 use collections::Vector;
-use std::collections::HashMap; //TODO: Own implementations of hashmap!
+use std::collections::HashMap; 
+//Won't be using own impelemntation as this is basically UI code
 use genetics::genes::{Gene, Target};
 use mapping::shapes::Rect;
 use std::io::Read;
@@ -7,6 +12,8 @@ use std::fs::File;
 use std::path::Path;
 use rustc_serialize::json;
 
+/// A blueprint of a single target that the algorithm will aim for. Will be
+/// transformed into Target by Blueprint.compile()
 #[derive(Copy, Clone, PartialEq, RustcDecodable, RustcEncodable)]
 pub struct TargetBlueprint {
     from_key: usize,
@@ -14,6 +21,8 @@ pub struct TargetBlueprint {
     weight: f32,
 }
 
+/// A "blueprint" for a type of room; will be transformed into Gene by 
+/// Blueprint.compile()
 #[derive(Copy, Clone, PartialEq, Eq, RustcDecodable, RustcEncodable)]
 pub struct RoomBlueprint {
     key: usize,
@@ -22,16 +31,21 @@ pub struct RoomBlueprint {
     amount: usize,
 }
 
+/// Blueprint is a collection of blueprints for rooms and targets that can be
+/// decoded from a JSON file and transformed into two vectors containing genes
+/// and targets.
 #[derive(RustcDecodable, RustcEncodable)]
 pub struct Blueprint {
     // Using Vec here instead of custom vector in order to not have to rewrite
-    // JSON parsing myself. I'm using custom data structures everywhere else,
-    // honest, gov'nor.
+    // JSON parsing myself. I'm using custom data structures everywhere else
+    // except this UI code, honest, gov'nor.
     pub rooms: Vec<RoomBlueprint>,
     pub targets: Vec<TargetBlueprint>,
 }
 
 impl Blueprint {
+	/// Creates two vectors, one containing genes and one containing targets, as
+	/// specified by the gene- and target blueprints inside this blueprint.
 	pub fn compile(&self) -> (Vector<Gene>, Vector<Target>) {
 		let mut key_to_id = HashMap::new();
 		let mut genes = Vector::new(); //TODO: new_with_size?
@@ -40,7 +54,8 @@ impl Blueprint {
 		for i in 0..self.rooms.len() {
 			let mut ids = Vector::new();
 			let room = self.rooms[i];
-			let rect = Rect::new(0, 0, room.width, room.height);
+			// Gene size is blueprint size + 1 (for room between genes)
+			let rect = Rect::new(0, 0, room.width + 1, room.height + 1);
 			for _ in 0..self.rooms[i].amount {
 				genes.push(Gene::new(rect, current_id as isize));
 				ids.push(current_id);
@@ -58,6 +73,7 @@ impl Blueprint {
 	}
 }
 
+/// Read a blueprint from a JSON file with given filename
 pub fn read(filename: String) -> Blueprint {
     let path = Path::new(&filename);
     let mut file = match File::open(&path) {
