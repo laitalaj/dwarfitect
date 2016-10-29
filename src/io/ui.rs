@@ -21,3 +21,23 @@ pub fn get_parsed_input<T: FromStr>() -> Result<T, Error> {
 				"Couldn't parse input to given type!"))
 	}
 }
+
+/// Tries to get input until succeeds
+pub fn get_input_loop() -> String {
+	loop {
+		match get_input() {
+			Ok(s) => return s,
+			Err(reason) => println!("Error: {:?}. Please try again.", reason)
+		};
+	}
+}
+
+/// Tries to get parsed input until succeeds
+pub fn get_parsed_input_loop<T: FromStr>() -> T {
+	loop {
+		match get_parsed_input() {
+			Ok(i) => return i,
+			Err(reason) => println!("Error: {:?}. Please try again.", reason)
+		}
+	}
+}
