@@ -20,3 +20,7 @@ testausta. Ohjelma kertoo, kuinka monta sukupolvea on prosessoitu, mikä on parh
 kandidaatin fitness-arvo, pinta-ala sekä geenien kokonaispinta-ala. Ohjelma myös tallentaa
 tekstitiedostoihin alkupopulaation parhaan yksilön sekä loppupopulaation priimajäsenen.
 Tämän avulla on mahdollista arvioida ohjelman kokonaistoimintaa.
+
+## Testien toistaminen
+Yksikkötestit voidaan ajaa esim. Rustin paketinhallintaohjelman kautta komennolla cargo test.
+Benchmark-testit saa ajettua komennolla cargo bench.
