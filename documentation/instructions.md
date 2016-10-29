@@ -2,27 +2,27 @@
 Here's how to create (hopefully-)fantastic layouts with dwarfitect. Dig right in!
 
 ## 1. Creating an input file
-The input file is a JSON file that specifies what kind of rooms do you desire,
+The input file is a JSON file that specifies what kind of rooms you desire,
 how many of each room type you need and with what priority should the rooms be
 close to each other. So open up your favourite text editor and get ready to 
 specify your desired layout.
 
 ### Specifying rooms
 Start with an opening curly bracket, a newline and the text `"rooms": [`. This
-tells the program that you're about to start specifying a list of desired room
+tells the program that you're about to start specifying a list of room
 types. The start of your file should now look something like this:
 ```json
 {
 "rooms": [
 ```
 
-Now we'll start typing in room info. For each desired room type write a line
+Now you can start typing in room info. For each desired room type write a line
 like this:
 ```json
 {"key": 0, "width": 9, "height": 8, "amount": 1}
 ```
-Here the number after `"key":` specifies a unique key for the room type. Make sure
-that no two room types have the same key! The number after `"width":` specifies 
+Here the number after `"key":` specifies a unique key for the room type. **Make sure
+that no two room types have the same key!** The number after `"width":` specifies 
 the width and the number after `"height":` the height of the rooms of this type,
 including walls (so floor space is (height-2)*(width-2) squares). The number
 after `"amount":` tells the program how many rooms of this type you want.
@@ -32,7 +32,7 @@ newline.
 
 #### Room key 0
 The key 0 is a special room; **there must be exactly one room of key 0!**. So
-your room specification **MUST** have one line with `"key": 0` and `"amount": 0`!
+your room specification **MUST** have one line with `"key": 0` and `"amount": 1`!
 This is because the layout is "anchored" on this room.
 
 When you feel like you have enough rooms specified, end the listing of room types
@@ -50,7 +50,7 @@ like this:
 ### Specifying targets
 Now that you have desired rooms listed out, let's start listing targets. Targets
 are priorities for rooms to be close to each other; they are used to calculate
-the fitness of a solution. Start listing targets by goint to a new line and
+the fitness of a solution. Start listing targets by adding a new line and
 typing in `"targets": [`. This tells the program again that you are starting a
 list of targets.
 
@@ -62,16 +62,18 @@ The target specifies that from which room type (`"from_key":`) to which room typ
 (`"to_key":`) you wish to minimize the distance and how important it is to minimize
 that distance (`"weight":`). After `"from_key":` write in a key that corresponds
 to some room type key that you specified before, and after `"to_key":` write in
-another room type key. After `"weight":` type in a floating point number seperated
-by a period; if you don't know what to use, go for `"weight": 1.0`. Again, add
-a comma after each target that's not the last one.
+another room type's key. After `"weight":` type in a floating point number seperated
+by a period. This will tell which distance minimizations should be prioritized; 
+if you don't know what to use, go for `"weight": 1.0` which is a "neutral" weight.
+Again, add a comma after each target that's not the last one.
 
 #### Details on specifying targets
-If you don't specify a target for some room key pair, the program won't care
-about the distance between those rooms. You only need to specify a target in one
-direction; if you already have `"from_key": 2, "to_key": 4`, you don't need to
-add `"from_key": 4, "to_key": 2`. If you don't specify any targets, the program
-will instead use the total area occupied by the rooms as it's measure of fitness.
++ If you don't specify a target for some room key pair, the program won't care
+about the distance between those room types. 
++ You only need to specify a target in one direction; if you already have 
+`"from_key": 2, "to_key": 4`, you don't need to add `"from_key": 4, "to_key": 2`.
++ If you don't specify any targets, the program will instead use the total area 
+occupied by the rooms as it's measure of fitness.
 
 When you are done listing targets, close the list with a square bracket.
 Your list of targets should now look something like this:
@@ -106,9 +108,11 @@ JSON object is done. Now your specification should look something like this:
     ]
 }
 ```
-Note how theres exactly 1 room with key 0 and how there's a comma after every
-variable and line in a list except the last and after the square bracket closing
-the listing of rooms.
+Note how...
++ ...there's exactly 1 room with key 0
++ ...there's a comma after every variable except the last
++ ...there's a comma after every line in a list except the last
++ ...there's a comma after the square bracket closing the listing of rooms
 
 And that's it, now you should have yourself a working input file! Save it as
 `your_filename_here.json` in the folder where the dwarfitect binary is located, 
@@ -116,7 +120,7 @@ and move on to generating a layout!
 
 ## 2. Making the magic happen
 Now that you have an input file resting in the folder of the dwarfitect binary,
-dwarfimain.exe (or just dwarfimain in unix), you are ready to generate a layout
+dwarfimain.exe (or just dwarfimain in Unix systems), you are ready to generate a layout
 from it. Start up dwarfimain, and get to it!
 
 ### Specifying input file
