@@ -317,6 +317,8 @@ impl Chromosome {
         };
         self.bounding_box_fresh = true;
     }
+    /// Calculates the fitness of the chromosome. Uses calculate_distance_fitness
+    /// if there is at least one target, otherwise uses calculate_area_fitness
     pub fn calculate_fitness(&mut self) {
     	if self.targets.len() == 0 {
     		self.calculate_area_fitness();
@@ -325,6 +327,8 @@ impl Chromosome {
     		self.calculate_distance_fitness();
     	}
     }
+    /// Calculates the fitness of the chromosome based on the weighted average
+    /// of distances specified by targets.
     pub fn calculate_distance_fitness(&mut self) {
     	let mut total_dist = 0.0;
     	let mut divisor = 0.0;
@@ -348,7 +352,7 @@ impl Chromosome {
     	let weighted_average = total_dist / divisor;
     	self.fitness = (10000.0 as f32).powf(self.targets.len() as f32 / weighted_average);
     }
-    /// Calculates this chromosome's fitness. Currently does this by comparing
+    /// Calculates this chromosome's fitness. Does this by comparing
     /// area  used up by the genes to the area of the minimum bounding box
     /// (so compact, rectangular designs flourish at the moment).
     /// Calls calculate_bounding_box in the beginning if the bounding box is not
