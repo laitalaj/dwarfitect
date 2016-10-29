@@ -379,6 +379,21 @@ mod tests {
     }
     
     #[test]
+    fn vector_insert_remove_work() {
+    	let mut vec = Vector::new();
+        for i in 0..10 {
+            vec.push(i);
+        }
+        vec.insert(3, 99);
+        assert_eq!(2, vec[2]);
+        assert_eq!(99, vec[3]);
+        assert_eq!(3, vec[4]);
+        assert_eq!(3, vec.remove(4));
+        assert_eq!(4, vec[4]);
+        assert_eq!(99, vec[3]);
+    }
+    
+    #[test]
     fn matrix_constructor_works() {
     	let w = 7;
     	let h = 9;
