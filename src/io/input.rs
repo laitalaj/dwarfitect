@@ -4,7 +4,7 @@
 
 use collections::Vector;
 use std::collections::HashMap; 
-//Won't be using own impelemntation as this is basically UI code
+//Won't be using own implementation as this is basically UI code
 use genetics::genes::{Gene, Target};
 use mapping::shapes::Rect;
 use std::io::Read;
@@ -87,6 +87,12 @@ pub fn read(filename: String) -> Blueprint {
     }
     let blueprint: Blueprint = json::decode(&data).unwrap();
     blueprint
+}
+
+/// Checks if a file exists
+pub fn exists(filename: &String) -> bool {
+	let path = Path::new(filename);
+	path.exists()
 }
 
 #[cfg(test)]
